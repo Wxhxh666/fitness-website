@@ -26,6 +26,7 @@ def create_app():
     from routes.upload import upload_bp
     from routes.admin import admin_bp
     from routes.user_plans import user_plans_bp
+    from routes.ai import ai_bp
 
     app.register_blueprint(exercises_bp, url_prefix="/api/exercises")
     app.register_blueprint(plans_bp, url_prefix="/api/plans")
@@ -36,6 +37,7 @@ def create_app():
     app.register_blueprint(upload_bp, url_prefix="/api")
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
     app.register_blueprint(user_plans_bp, url_prefix="/api/plans/user")
+    app.register_blueprint(ai_bp, url_prefix="/api/ai")
 
     # Root - API index
     @app.route("/api", methods=["GET"])
@@ -55,6 +57,19 @@ def create_app():
                 "GET  /api/body-metrics/measurements[?user_id=]",
                 "PUT  /api/body-metrics/measurements/:id",
                 "GET  /api/body-metrics/history[?metric_key=&days=]",
+                "POST /api/body-metrics/calculate",
+                "GET|POST /api/body-metrics/records",
+                "GET  /api/body-metrics/records/compare?a=&b=",
+                "DELETE /api/body-metrics/records/:id",
+                "GET  /api/body-metrics/export",
+                "GET|POST /api/body-metrics/profile",
+                "GET|POST /api/body-metrics/goals",
+                "POST /api/ai/diet-plan",
+                "GET|POST /api/ai/diet-plans",
+                "DELETE /api/ai/diet-plans/:id",
+                "GET|POST /api/ai/diet-logs",
+                "DELETE /api/ai/diet-logs/:id",
+                "POST /api/ai/weekly-review",
                 "POST /api/contact",
                 "GET  /api/site/contact-info",
             ],

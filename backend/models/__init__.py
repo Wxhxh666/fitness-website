@@ -28,3 +28,6 @@ class BaseModel:
         return self
 
 from .user_plan import UserPlan, TrainingLog
+from .body_record import BodyRecord, BodyGoal, BodyProfile
+from .diet_plan import DietPlan
+from .diet_log import DietLog

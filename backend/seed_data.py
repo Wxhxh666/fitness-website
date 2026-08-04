@@ -12,8 +12,11 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from app import app, db
 from models.exercise import ExerciseCategory, Exercise
 from models.plan import PlanGoal, Plan
-from models.body_metric import BodyMetric
-from models.site import SiteInfo
+from models.body_metric import BodyMetric
+from models.body_record import BodyRecord, BodyGoal, BodyProfile
+from models.diet_plan import DietPlan
+from models.diet_log import DietLog
+from models.site import SiteInfo
 
 
 def ok(msg):
@@ -22,7 +25,7 @@ def ok(msg):
 
 def seed_categories():
     items = [
-        {"key": "chest", "label": "胸部", "weekly_schedule": [{"day": "周一", "focus": "胸部", "exercises": [{"exercise_id": 1, "name": "杠铃卧推", "sets": 4, "reps": "10-12"}]}, {"day": "周二", "focus": "背部", "exercises": [{"exercise_id": 6, "name": "引体向上", "sets": 4, "reps": "8-12"}]}, {"day": "周三", "focus": "肩部", "exercises": [{"exercise_id": 14, "name": "哑铃侧平举", "sets": 4, "reps": "12-15"}]}, {"day": "周四", "focus": "腿部", "exercises": [{"exercise_id": 10, "name": "杠铃深蹲", "sets": 4, "reps": "8-12"}]}, {"day": "周五", "focus": "腹部", "exercises": [{"exercise_id": 18, "name": "悬垂举腿", "sets": 3, "reps": "12-15"}]}]},
+        {"key": "chest", "label": "胸部"},
         {"key": "back", "label": "背部"},
         {"key": "legs", "label": "腿部", "sort_order": 3},
         {"key": "shoulders", "label": "肩部", "sort_order": 4},

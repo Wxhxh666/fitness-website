@@ -438,6 +438,237 @@
 }
 ```
 
+### 4.6 多维指标计算
+
+一键计算 BMI、体脂率、BMR、TDEE、腰臀比、肌肉量估算与标准体重，并返回健康提示。
+
+**`POST /body-metrics/calculate`**
+
+**请求体**：
+```json
+{
+  "gender": "male",
+  "age": 28,
+  "activity_level": "moderate",
+  "height_cm": 175,
+  "weight_kg": 72.5,
+  "waist_cm": 80,
+  "hip_cm": 96,
+  "neck_cm": 38
+}
+```
+
+> `activity_level` 枚举：`sedentary`(久坐少动) / `light`(轻度运动) / `moderate`(中度力量训练) / `intense`(高强度训练) / `athlete`(运动员级别)。`waist_cm` / `hip_cm` / `neck_cm` 可选，提供颈围时体脂率优先使用 US Navy 公式，否则使用 Deurenberg 简化公式。
+
+**响应示例**：
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "bmi": 23.7,
+    "bmi_category": "normal",
+    "bmi_category_label": "正常范围",
+    "bmi_range": [18.5, 24.9],
+    "body_fat": 12.9,
+    "body_fat_formula": "navy",
+    "body_fat_range": [10, 20],
+    "bmr": 1684,
+    "tdee": 2610,
+    "whr": 0.83,
+    "muscle_mass": 57.0,
+    "standard_weight": 67.4,
+    "healthy_weight_range": [56.6, 76.2],
+    "health_tips": [
+      { "level": "info", "text": "BMI 处于正常范围，继续保持当前的饮食与训练节奏。" }
+    ]
+  }
+}
+```
+
+### 4.7 保存身材记录（一键存档）
+
+**`POST /body-metrics/records`**
+
+**请求体**（身高 / 体重 / 围度按需提供，服务端自动计算缺失指标）：
+```json
+{
+  "record_date": "2026-07-20",
+  "stage": "fatloss",
+  "gender": "male",
+  "age": 28,
+  "activity_level": "moderate",
+  "height_cm": 175,
+  "weight_kg": 72.5,
+  "waist_cm": 80,
+  "hip_cm": 96,
+  "chest_cm": 102,
+  "shoulder_cm": 45,
+  "thigh_cm": 54,
+  "arm_cm": 36,
+  "calf_cm": 37
+}
+```
+
+> `stage` 枚举：`fatloss`(减脂) / `muscle`(增肌) / `maintain`(保持)。保存成功后同步核心指标与围度快照。
+
+### 4.8 获取身材记录列表
+
+**`GET /body-metrics/records`**
+
+| 参数    | 类型 | 必填 | 说明                  | 默认值 |
+|---------|------|------|-----------------------|--------|
+| `days`  | int  | 否   | 仅返回最近 N 天记录    | —      |
+| `limit` | int  | 否   | 最大返回条数（≤1000） | 200    |
+
+**响应示例**：
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "items": [
+      {
+        "id": 1,
+        "record_date": "2026-07-20",
+        "stage": "fatloss",
+        "gender": "male",
+        "age": 28,
+        "activity_level": "moderate",
+        "height_cm": 175,
+        "weight_kg": 72.5,
+        "bmi": 23.7,
+        "body_fat": 12.9,
+        "bmr": 1684,
+        "tdee": 2610,
+        "whr": 0.83,
+        "muscle_mass": 57.0,
+        "standard_weight": 67.4
+      }
+    ],
+    "total": 1
+  }
+}
+```
+
+### 4.9 记录对比
+
+**`GET /body-metrics/records/compare?a={id}&b={id}`**
+
+自动计算两条记录在体重、BMI、体脂率、腰围、腰臀比、肌肉量、BMR、TDEE 上的差值，并生成简短文字小结。
+
+### 4.10 删除记录
+
+- **`DELETE /body-metrics/records/:id`**：删除单条记录。
+- **`DELETE /body-metrics/records`**：清空当前用户全部记录。
+
+### 4.11 导出 Excel
+
+**`GET /body-metrics/export`**
+
+导出全部身材记录为 `.xlsx`（依赖 openpyxl，缺失时自动回退为 `.csv`），列包含日期、阶段、性别、年龄、运动强度、身高、体重、各围度、BMI、体脂率、BMR、TDEE、腰臀比、肌肉量、标准体重。
+
+### 4.12 个人基础档案
+
+- **`GET /body-metrics/profile`**：获取性别 / 年龄 / 运动强度 / 单位制（未保存时返回默认值）。
+- **`POST /body-metrics/profile`**：保存档案，请求体如 `{ "gender": "male", "age": 28, "activity_level": "moderate", "unit_system": "metric" }`。`unit_system` 枚举：`metric`(cm/kg) / `imperial`(in/lb)。
+
+### 4.13 目标身材设定
+
+- **`GET /body-metrics/goals`**：获取当前用户目标列表。
+- **`POST /body-metrics/goals`**：保存目标（同一用户仅保留一个当前目标），请求体如 `{ "target_weight": 65, "target_bmi": 21.5, "target_body_fat": 18, "daily_calorie": 1900 }`。
+- **`DELETE /body-metrics/goals/:id`**：删除目标。
+
+### 4.14 生成 AI 饮食方案
+
+Flask 后端按内置专业健身营养 Prompt 模板封装请求，调用 DeepSeek Chat Completions API，返回结构化饮食方案。
+
+**`POST /ai/diet-plan`**
+
+**请求体**：
+```json
+{
+  "height_cm": 175,
+  "weight_kg": 72.5,
+  "bmi": 23.7,
+  "body_fat": 12.9,
+  "gender": "male",
+  "age": 28,
+  "bmr": 1684,
+  "tdee": 2610,
+  "target": "fatloss",
+  "sport_level": "moderate",
+  "diet_limit": "不吃海鲜，乳糖不耐受",
+  "eat_scene": "自己做饭",
+  "regenerate": false
+}
+```
+
+> `target` 枚举：`fatloss`(减脂) / `muscle`(增肌) / `maintain`(维持体重)；`sport_level` 与身材数据模块一致。缺失的 BMI / BMR / TDEE 会由后端自动计算补齐。`regenerate=true` 时提示模型生成一套不同食谱。未配置 `DEEPSEEK_API_KEY` 时返回演示方案（`mock: true`）。
+
+> 对话式扩展：请求体可额外携带 `user_message`（用户本次提问/补充要求，会附加到 Prompt 末尾）与 `history`（最近对话上下文，`[{ "role": "user"|"assistant", "content": "…" }]`，最多取 8 条），支持连续追问如「换成外卖版」「减少主食」。模型为推理模型时后端默认关闭思考（`thinking: {"type": "disabled"}`）以加快返回，接口不支持时自动回退。
+
+**响应示例**：
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "plan": {
+      "summary": { "calories": 2110, "protein_g": 145, "carbs_g": 240, "fat_g": 65, "note": "每日约 500kcal 热量缺口" },
+      "meals": [
+        { "name": "早餐", "items": [ { "food": "全麦吐司", "weight": "2片(约70g)", "calories": 180 } ], "note": "" }
+      ],
+      "water_tips": "每日饮水建议…",
+      "taboos": ["避免油炸食品"],
+      "tips": ["蛋白质分配到每餐…"]
+    },
+    "raw_text": "…模型原始输出…",
+    "format": "json",
+    "model": "deepseek-chat",
+    "mock": false
+  }
+}
+```
+
+### 4.15 保存 / 查看 / 删除饮食方案
+
+- **`POST /ai/diet-plans`**：保存方案到用户档案。请求体：`{ "target": "fatloss", "sport_level": "moderate", "diet_limit": "…", "eat_scene": "…", "plan_json": "…", "raw_text": "…", "model": "deepseek-chat" }`。
+- **`GET /ai/diet-plans`**：获取当前用户已保存方案列表（含热量摘要）。
+- **`GET /ai/diet-plans/:id`**：获取方案详情（含完整结构化 plan）。
+- **`DELETE /ai/diet-plans/:id`**：删除方案。
+
+### 4.16 每日饮食打卡
+
+- **`POST /ai/diet-logs`**：记录当日摄入热量与三大营养素，同一天重复提交会覆盖。请求体：`{ "log_date": "2026-08-04", "calories": 1850, "protein_g": 120, "carbs_g": 210, "fat_g": 60, "note": "训练日" }`。
+- **`GET /ai/diet-logs?days=30`**：获取最近 N 天打卡记录（默认 30 天），前端与 TDEE 对比展示热量缺口 / 盈余。
+- **`DELETE /ai/diet-logs/:id`**：删除一条打卡记录。
+
+### 4.17 周期复盘（近 7 天）
+
+**`POST /ai/weekly-review`**
+
+自动汇总近 7 天身材记录（体重 / BMI / 体脂变化）与饮食打卡（打卡天数、日均摄入 vs TDEE），构造复盘 Prompt 调用 DeepSeek，返回一周健身饮食复盘小结。
+
+**响应示例**：
+```json
+{
+  "code": 0,
+  "msg": "success",
+  "data": {
+    "review_text": "【本周复盘】…",
+    "summary": {
+      "record_count": 3,
+      "weight": { "start": 73.0, "end": 72.2, "change": -0.8 },
+      "bmi": { "start": 23.8, "end": 23.6, "change": -0.2 },
+      "body_fat": null,
+      "diet": { "log_days": 2, "avg_calories": 1825.0, "tdee": 2605.0, "avg_diff": -780.0 }
+    },
+    "mock": false
+  }
+}
+```
+
 ---
 
 ## 5. 联系 (Contact)
@@ -630,6 +861,69 @@
 | `email`          | string | 邮箱          |
 | `business_hours` | object | 营业时间       |
 | `social_media`   | array  | 社交媒体列表   |
+
+### 6.8 BodyRecord（身材记录快照）
+
+| 字段             | 类型   | 说明                        |
+|------------------|--------|-----------------------------|
+| `id`             | int    | 主键                        |
+| `user_id`        | int    | 用户 ID                     |
+| `record_date`    | date   | 记录日期                    |
+| `stage`          | string | 阶段：fatloss / muscle / maintain |
+| `gender`         | string | 性别                        |
+| `age`            | int    | 年龄                        |
+| `activity_level` | string | 运动强度                    |
+| `height_cm` / `weight_kg` / `waist_cm` / `hip_cm` / `neck_cm` | float | 基础参数 |
+| `chest_cm` / `shoulder_cm` / `thigh_cm` / `arm_cm` / `calf_cm` | float | 围度参数 |
+| `bmi` / `body_fat` / `bmr` / `tdee` / `whr` / `muscle_mass` / `standard_weight` | float | 计算结果 |
+
+### 6.9 BodyGoal（目标身材）
+
+| 字段             | 类型   | 说明             |
+|------------------|--------|------------------|
+| `id`             | int    | 主键             |
+| `user_id`        | int    | 用户 ID          |
+| `target_weight`  | float  | 目标体重 kg      |
+| `target_bmi`     | float  | 目标 BMI         |
+| `target_body_fat`| float  | 目标体脂率 %     |
+| `daily_calorie`  | float  | 每日目标摄入 kcal |
+
+### 6.10 BodyProfile（个人基础档案）
+
+| 字段             | 类型   | 说明                     |
+|------------------|--------|--------------------------|
+| `user_id`        | int    | 用户 ID（唯一）          |
+| `gender`         | string | 性别                     |
+| `age`            | int    | 年龄                     |
+| `activity_level` | string | 运动强度                 |
+| `unit_system`    | string | 单位制：metric / imperial |
+
+### 6.11 DietPlan（AI 饮食方案）
+
+| 字段          | 类型   | 说明                            |
+|---------------|--------|---------------------------------|
+| `id`          | int    | 主键                            |
+| `user_id`     | int    | 用户 ID                         |
+| `target`      | string | 目标：fatloss / muscle / maintain |
+| `sport_level` | string | 运动强度                        |
+| `diet_limit`  | string | 饮食限制与偏好                  |
+| `eat_scene`   | string | 就餐条件                        |
+| `plan_json`   | text   | 结构化方案 JSON                 |
+| `raw_text`    | text   | 模型原始输出                    |
+| `model`       | string | 模型名称                        |
+
+### 6.12 DietLog（每日饮食打卡）
+
+| 字段       | 类型   | 说明               |
+|------------|--------|--------------------|
+| `id`       | int    | 主键               |
+| `user_id`  | int    | 用户 ID            |
+| `log_date` | date   | 打卡日期（同日覆盖）|
+| `calories` | float  | 当日摄入热量 kcal  |
+| `protein_g`| float  | 蛋白质 g           |
+| `carbs_g`  | float  | 碳水 g             |
+| `fat_g`    | float  | 脂肪 g             |
+| `note`     | string | 备注               |
 
 ---
 

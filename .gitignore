@@ -29,3 +29,8 @@ Thumbs.db
 
 # Logs
 *.log
+
+# 本地备份/遗留文件（不推送）
+src/views/BodyDataView.legacy.vue
+src/views/BodyDataView.v3.legacy.vue
+src/views/__delete_test.legacy.tmp

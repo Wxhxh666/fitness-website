@@ -80,6 +80,31 @@ export interface Measurement {
   id: number; key: string; label: string; value: number; unit: string
 }
 
+export interface BodyRecord {
+  id: number
+  record_date: string
+  stage: string | null
+  gender: string
+  age: number | null
+  activity_level: string
+  height_cm: number | null
+  weight_kg: number | null
+  waist_cm: number | null
+  hip_cm: number | null
+  chest_cm: number | null
+  shoulder_cm: number | null
+  thigh_cm: number | null
+  arm_cm: number | null
+  calf_cm: number | null
+  bmi: number | null
+  body_fat: number | null
+  bmr: number | null
+  tdee: number | null
+  whr: number | null
+  muscle_mass: number | null
+  standard_weight: number | null
+}
+
 // ---------- Exercises ----------
 export function getExerciseCategories() {
   return http.get<any, { code: number; data: { key: string; label: string }[] }>('/exercises/categories')
@@ -156,6 +181,96 @@ export function updateMeasurement(id: number, value: number) {
 
 export function getMetricHistory(metricKey?: string, days?: number) {
   return http.get<any, { code: number; data: { metric_key: string; records: { date: string; value: number }[] }[] }>('/body-metrics/history', { params: { metric_key: metricKey, days } })
+}
+
+// ---------- Body Analytics (New) ----------
+export function calculateBodyMetrics(data: any) {
+  return http.post<any, { code: number; data: any }>('/body-metrics/calculate', data)
+}
+
+export function saveBodyRecord(data: any) {
+  return http.post<any, { code: number; data: BodyRecord }>('/body-metrics/records', data)
+}
+
+export function getBodyRecords(params?: { days?: number; limit?: number }) {
+  return http.get<any, { code: number; data: { items: BodyRecord[]; total: number } }>('/body-metrics/records', { params })
+}
+
+export function deleteBodyRecord(id: number) {
+  return http.delete<any, { code: number; msg: string }>(`/body-metrics/records/${id}`)
+}
+
+export function deleteAllBodyRecords() {
+  return http.delete<any, { code: number; msg: string }>('/body-metrics/records')
+}
+
+export function compareBodyRecords(a: number, b: number) {
+  return http.get<any, { code: number; data: any }>('/body-metrics/records/compare', { params: { a, b } })
+}
+
+export async function exportBodyRecords(): Promise<Blob> {
+  const res = await axios.get('http://127.0.0.1:8000/api/body-metrics/export', {
+    responseType: 'blob',
+    headers: { Authorization: `Bearer ${getToken() || ''}` },
+  })
+  return res.data as Blob
+}
+
+export function getBodyProfile() {
+  return http.get<any, { code: number; data: any }>('/body-metrics/profile')
+}
+
+export function saveBodyProfile(data: any) {
+  return http.post<any, { code: number; data: any }>('/body-metrics/profile', data)
+}
+
+export function getBodyGoals() {
+  return http.get<any, { code: number; data: { items: any[] } }>('/body-metrics/goals')
+}
+
+export function saveBodyGoal(data: any) {
+  return http.post<any, { code: number; data: any }>('/body-metrics/goals', data)
+}
+
+export function deleteBodyGoal(id: number) {
+  return http.delete<any, { code: number; msg: string }>(`/body-metrics/goals/${id}`)
+}
+
+// ---------- AI Diet Plan ----------
+export function generateDietPlan(data: any, regenerate = false) {
+  return http.post<any, { code: number; data: any }>('/ai/diet-plan', { ...data, regenerate }, { timeout: 120000 })
+}
+
+export function saveDietPlan(data: any) {
+  return http.post<any, { code: number; data: any }>('/ai/diet-plans', data)
+}
+
+export function getDietPlans() {
+  return http.get<any, { code: number; data: { items: any[]; total: number } }>('/ai/diet-plans')
+}
+
+export function getDietPlanDetail(id: number) {
+  return http.get<any, { code: number; data: any }>(`/ai/diet-plans/${id}`)
+}
+
+export function deleteDietPlan(id: number) {
+  return http.delete<any, { code: number; msg: string }>(`/ai/diet-plans/${id}`)
+}
+
+export function saveDietLog(data: any) {
+  return http.post<any, { code: number; data: any }>('/ai/diet-logs', data)
+}
+
+export function getDietLogs(params?: { days?: number }) {
+  return http.get<any, { code: number; data: { items: any[]; total: number } }>('/ai/diet-logs', { params })
+}
+
+export function deleteDietLog(id: number) {
+  return http.delete<any, { code: number; msg: string }>(`/ai/diet-logs/${id}`)
+}
+
+export function generateWeeklyReview() {
+  return http.post<any, { code: number; data: any }>('/ai/weekly-review', {}, { timeout: 120000 })
 }
 
 // ---------- Contact ----------

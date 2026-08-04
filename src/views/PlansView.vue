@@ -9,6 +9,50 @@
       </div>
     </section>
 
+    <!-- 身材数据与饮食方案联动横幅 -->
+    <section v-if="syncData" class="section section-light" style="padding: 22px 0 0;">
+      <div class="container">
+        <div class="sync-banner">
+          <div class="sync-banner__head">
+            <span class="sync-banner__label">FITNESS SYNC</span>
+            <button class="sync-banner__close" @click="clearSync"><el-icon><Close /></el-icon></button>
+          </div>
+          <div class="sync-banner__body">
+            <div class="sync-banner__metrics">
+              <div class="sync-banner__metric">
+                <span>体重</span>
+                <b>{{ syncData.metrics?.weight_kg ?? '--' }} kg</b>
+              </div>
+              <div class="sync-banner__metric">
+                <span>BMI</span>
+                <b>{{ syncData.metrics?.bmi ?? '--' }}</b>
+              </div>
+              <div class="sync-banner__metric">
+                <span>体脂率</span>
+                <b>{{ syncData.metrics?.body_fat ?? '--' }}%</b>
+              </div>
+              <div class="sync-banner__metric">
+                <span>TDEE</span>
+                <b>{{ syncData.metrics?.tdee ?? '--' }} kcal</b>
+              </div>
+              <div class="sync-banner__metric">
+                <span>饮食方案</span>
+                <b>{{ syncData.diet?.summary?.calories ? syncData.diet.summary.calories + ' kcal/天' : '--' }}</b>
+              </div>
+              <div class="sync-banner__metric">
+                <span>健身目标</span>
+                <b>{{ syncTargetLabel }}</b>
+              </div>
+            </div>
+            <p class="sync-banner__tip">已从「身材数据管理」页同步身材指标与 AI 饮食方案，搭配下方训练计划形成完整健身闭环。</p>
+            <div class="sync-banner__actions">
+              <router-link to="/body-data" class="btn-outline-dark">返回身材数据页</router-link>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
     <!-- Tab Switch -->
     <section class="section section-light" style="padding:24px 0 0;">
       <div class="container">
@@ -218,6 +262,17 @@ const logTargetPlan = ref<any>(null)
 const savingLog = ref(false)
 const logNote = ref('')
 const trainingStats = ref<any>({})
+const syncData = ref<any>(null)
+
+const syncTargetLabel = computed(() => {
+  const map: Record<string, string> = { fatloss: '减脂', muscle: '增肌', maintain: '维持体重' }
+  return map[syncData.value?.target] || syncData.value?.target || '--'
+})
+
+function clearSync() {
+  localStorage.removeItem('fitluxe_fitness_sync')
+  syncData.value = null
+}
 
 async function loadGoals() {
   try {
@@ -357,6 +412,10 @@ async function confirmLog() {
 }
 
 onMounted(async () => {
+  try {
+    const raw = localStorage.getItem('fitluxe_fitness_sync')
+    syncData.value = raw ? JSON.parse(raw) : null
+  } catch { /* ignore */ }
   await loadGoals()
   await loadPlans()
   if (isLoggedIn.value) loadMyPlans()
@@ -372,6 +431,17 @@ onMounted(async () => {
 .page-hero__desc { font-size:15px; color:var(--clr-gray-light); max-width:500px; }
 
 .plans__tabs { display:flex; gap:12px; margin-bottom:0; }
+.sync-banner { background: var(--clr-white); border: 1px solid rgba(201, 169, 110, 0.35); padding: 20px 24px; }
+.sync-banner__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.sync-banner__label { font-size: 11px; letter-spacing: 3px; color: var(--clr-gold); }
+.sync-banner__close { background: none; border: none; color: var(--clr-gray-light); cursor: pointer; font-size: 16px; }
+.sync-banner__close:hover { color: var(--clr-dark); }
+.sync-banner__metrics { display: grid; grid-template-columns: repeat(6, 1fr); gap: 12px; margin-bottom: 14px; }
+.sync-banner__metric { display: flex; flex-direction: column; gap: 2px; padding: 12px; background: var(--clr-bg-section); border: 1px solid rgba(0, 0, 0, 0.04); }
+.sync-banner__metric span { font-size: 11px; color: var(--clr-gray); letter-spacing: 1px; }
+.sync-banner__metric b { font-family: var(--font-display); font-size: 17px; font-weight: 400; color: var(--clr-dark); }
+.sync-banner__tip { font-size: 12px; color: var(--clr-gray); margin-bottom: 12px; }
+.sync-banner__actions { display: flex; }
 .plans__tabs .tab-btn { padding:12px 28px; background:transparent; border:1px solid rgba(0,0,0,0.08); font-size:13px; letter-spacing:1px; color:var(--clr-gray); cursor:pointer; transition:all .3s; font-family:inherit; display:flex; align-items:center; gap:6px; }
 .plans__tabs .tab-btn:hover { border-color:var(--clr-gold); color:var(--clr-gold); }
 .plans__tabs .tab-btn.is-active { background:var(--clr-gold); border-color:var(--clr-gold); color:var(--clr-white); }

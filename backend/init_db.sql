@@ -80,7 +80,7 @@ CREATE TABLE IF NOT EXISTS body_metrics (
   label        VARCHAR(32)   NOT NULL COMMENT "中文名",
   value        DECIMAL(8,1)  NOT NULL COMMENT "当前值",
   unit         VARCHAR(16)   DEFAULT "cm",
-  change       DECIMAL(8,1)  DEFAULT 0.0,
+  `change`     DECIMAL(8,1)  DEFAULT 0.0,
   trend        VARCHAR(8)    DEFAULT "up",
   recorded_at  DATETIME      DEFAULT CURRENT_TIMESTAMP COMMENT "记录时间",
   created_at   DATETIME      DEFAULT CURRENT_TIMESTAMP,
@@ -138,4 +138,146 @@ CREATE TABLE IF NOT EXISTS verification_codes (
   created_at  DATETIME      DEFAULT CURRENT_TIMESTAMP,
   updated_at  DATETIME      DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT="验证码表";
+
+-- ---------- 用户计划表 ----------
+CREATE TABLE IF NOT EXISTS `user_plans` (
+  `user_id` int NOT NULL COMMENT '用户 ID',
+  `name` varchar(100) NOT NULL COMMENT '计划名称',
+  `goal` varchar(32) DEFAULT NULL COMMENT '目标',
+  `description` text COMMENT '计划描述',
+  `duration` varchar(32) DEFAULT NULL COMMENT '周期',
+  `frequency` varchar(32) DEFAULT NULL COMMENT '频次',
+  `difficulty` varchar(16) DEFAULT NULL COMMENT '难度',
+  `difficulty_label` varchar(8) DEFAULT NULL COMMENT '难度中文名',
+  `focus_tags` json DEFAULT NULL COMMENT '专注标签',
+  `cover_url` varchar(256) DEFAULT NULL COMMENT '封面图',
+  `weekly_schedule` json DEFAULT NULL COMMENT '周训安排',
+  `is_active` tinyint(1) DEFAULT NULL,
+  `source_plan_id` int DEFAULT NULL COMMENT '来源官方计划ID',
+  `id` int NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------- 训练日志表 ----------
+CREATE TABLE IF NOT EXISTS `training_logs` (
+  `user_id` int NOT NULL COMMENT '用户 ID',
+  `plan_id` int NOT NULL COMMENT '计划 ID',
+  `is_official` tinyint(1) DEFAULT NULL COMMENT '是否官方计划',
+  `log_date` date NOT NULL COMMENT '训练日期',
+  `focus` varchar(32) DEFAULT NULL COMMENT '训练重点',
+  `exercises` json DEFAULT NULL COMMENT '完成动作列表',
+  `note` text COMMENT '备注',
+  `id` int NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------- 身材记录快照 ----------
+CREATE TABLE IF NOT EXISTS `body_records` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT DEFAULT 0 COMMENT '用户 ID',
+  `record_date` DATE DEFAULT NULL COMMENT '记录日期',
+  `stage` VARCHAR(16) DEFAULT NULL COMMENT '阶段: fatloss/muscle/maintain',
+  `gender` VARCHAR(8) DEFAULT 'male' COMMENT '性别',
+  `age` INT DEFAULT NULL COMMENT '年龄',
+  `activity_level` VARCHAR(16) DEFAULT 'light' COMMENT '运动强度',
+  `height_cm` DOUBLE DEFAULT NULL,
+  `weight_kg` DOUBLE DEFAULT NULL,
+  `waist_cm` DOUBLE DEFAULT NULL,
+  `hip_cm` DOUBLE DEFAULT NULL,
+  `neck_cm` DOUBLE DEFAULT NULL,
+  `chest_cm` DOUBLE DEFAULT NULL,
+  `shoulder_cm` DOUBLE DEFAULT NULL,
+  `thigh_cm` DOUBLE DEFAULT NULL,
+  `arm_cm` DOUBLE DEFAULT NULL,
+  `calf_cm` DOUBLE DEFAULT NULL,
+  `bmi` DOUBLE DEFAULT NULL,
+  `body_fat` DOUBLE DEFAULT NULL,
+  `bmr` DOUBLE DEFAULT NULL,
+  `tdee` DOUBLE DEFAULT NULL,
+  `whr` DOUBLE DEFAULT NULL,
+  `muscle_mass` DOUBLE DEFAULT NULL,
+  `standard_weight` DOUBLE DEFAULT NULL,
+  `created_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_records_user_date` (`user_id`, `record_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='身材数据快照';
+
+-- ---------- 目标身材设定 ----------
+CREATE TABLE IF NOT EXISTS `body_goals` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT DEFAULT 0 COMMENT '用户 ID',
+  `target_weight` DOUBLE DEFAULT NULL COMMENT '目标体重 kg',
+  `target_bmi` DOUBLE DEFAULT NULL COMMENT '目标 BMI',
+  `target_body_fat` DOUBLE DEFAULT NULL COMMENT '目标体脂率 %',
+  `daily_calorie` DOUBLE DEFAULT NULL COMMENT '每日目标摄入 kcal',
+  `created_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_goals_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='目标身材设定';
+
+-- ---------- 个人基础档案 ----------
+CREATE TABLE IF NOT EXISTS `body_profiles` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT DEFAULT 0 UNIQUE COMMENT '用户 ID',
+  `gender` VARCHAR(8) DEFAULT 'male',
+  `age` INT DEFAULT 25,
+  `activity_level` VARCHAR(16) DEFAULT 'light',
+  `unit_system` VARCHAR(8) DEFAULT 'metric',
+  `created_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='个人基础档案';
+
+-- ---------- AI 饮食方案存档 ----------
+CREATE TABLE IF NOT EXISTS `diet_plans` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT DEFAULT 0 COMMENT '用户 ID',
+  `target` VARCHAR(16) DEFAULT 'fatloss' COMMENT '目标: fatloss/muscle/maintain',
+  `sport_level` VARCHAR(32) DEFAULT NULL COMMENT '运动强度',
+  `diet_limit` VARCHAR(256) DEFAULT NULL COMMENT '饮食限制与偏好',
+  `eat_scene` VARCHAR(64) DEFAULT NULL COMMENT '就餐条件',
+  `plan_json` TEXT COMMENT '结构化方案 JSON',
+  `raw_text` TEXT COMMENT '模型原始输出',
+  `model` VARCHAR(64) DEFAULT NULL COMMENT '模型名称',
+  `created_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_diet_plans_user` (`user_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='AI 饮食方案存档';
+
+-- ---------- 每日饮食打卡 ----------
+CREATE TABLE IF NOT EXISTS `diet_logs` (
+  `id` INT NOT NULL AUTO_INCREMENT,
+  `user_id` INT DEFAULT 0 COMMENT '用户 ID',
+  `log_date` DATE DEFAULT NULL COMMENT '打卡日期',
+  `calories` DOUBLE DEFAULT NULL COMMENT '当日摄入热量 kcal',
+  `protein_g` DOUBLE DEFAULT NULL COMMENT '蛋白质 g',
+  `carbs_g` DOUBLE DEFAULT NULL COMMENT '碳水 g',
+  `fat_g` DOUBLE DEFAULT NULL COMMENT '脂肪 g',
+  `note` VARCHAR(256) DEFAULT NULL COMMENT '备注',
+  `created_at` DATETIME NOT NULL,
+  `updated_at` DATETIME NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_diet_logs_user_date` (`user_id`, `log_date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每日饮食打卡';
+
+-- ---------- 资料修改申请表 ----------
+CREATE TABLE IF NOT EXISTS `profile_change_requests` (
+  `user_id` int NOT NULL,
+  `field_name` varchar(32) NOT NULL,
+  `old_value` varchar(256) DEFAULT NULL,
+  `new_value` varchar(256) NOT NULL,
+  `status` varchar(16) DEFAULT NULL,
+  `remark` varchar(256) DEFAULT NULL,
+  `id` int NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
