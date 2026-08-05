@@ -120,6 +120,9 @@ CREATE TABLE IF NOT EXISTS users (
   password_hash VARCHAR(256)  COMMENT "密码哈希",
   nickname      VARCHAR(50)   COMMENT "昵称",
   avatar_url    VARCHAR(256)  COMMENT "头像",
+  ai_model      VARCHAR(32)   DEFAULT "deepseek-flash" COMMENT "默认AI模型",
+  unit_system   VARCHAR(16)   DEFAULT "metric" COMMENT "度量单位",
+  notification_enabled TINYINT(1) DEFAULT 1 COMMENT "通知开关",
   is_active     TINYINT(1)    DEFAULT 1,
   is_admin      TINYINT(1)    DEFAULT 0 COMMENT "?????",
   last_login_at DATETIME      COMMENT "最后登录时间",
@@ -279,5 +282,19 @@ CREATE TABLE IF NOT EXISTS `profile_change_requests` (
   `created_at` datetime NOT NULL,
   `updated_at` datetime NOT NULL,
   PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- ---------- AI 周复盘记录表 ----------
+CREATE TABLE IF NOT EXISTS `weekly_reviews` (
+  `user_id` int NOT NULL COMMENT '用户 ID',
+  `week_start` varchar(10) NOT NULL COMMENT '周起始日期(周一)',
+  `review_text` text COMMENT '复盘文本',
+  `summary_json` json DEFAULT NULL COMMENT '周统计摘要',
+  `model` varchar(64) DEFAULT '' COMMENT '生成模型',
+  `id` int NOT NULL AUTO_INCREMENT,
+  `created_at` datetime NOT NULL,
+  `updated_at` datetime NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `idx_weekly_reviews_user` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

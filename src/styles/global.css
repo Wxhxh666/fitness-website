@@ -214,3 +214,421 @@ ul { list-style: none; }
   .section-title { font-size: 28px; }
   .section-desc { font-size: 14px; }
 }
+
+/* ================================================================
+   BodyDataView · 黑金轻奢质感升级（仅样式，不改布局与功能）
+   主色暖金 #B89C66 / hover #A08652 / 顶部 #0A0A0A / 内容 #F8F5EF
+   ================================================================ */
+.bodydata-page {
+  --clr-gold: #B89C66;
+  --clr-gold-dark: #A08652;
+  --clr-gold-light: #E2D2AC;
+  --clr-accent: #8B7355;
+  --clr-dark: #1A1A1A;
+  --clr-gray: #777777;
+  --clr-gray-light: #A9A29A;
+  --clr-gray-lighter: #C9C4BC;
+  --clr-bg-section: #F8F5EF;
+  --clr-cream-light: #FBF8F2;
+  --font-display: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+  background: #F8F5EF;
+}
+.bodydata-page,
+.bodydata-page * {
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* ---------- 1. 卡片：12px 圆角 + 柔和金色弱阴影 + 24px 节奏 ---------- */
+.bodydata-page .panel-card,
+.bodydata-page .metric-card,
+.bodydata-page .metric-detail-card,
+.bodydata-page .calc__form,
+.bodydata-page .health-tips,
+.bodydata-page .bmi-guide,
+.bodydata-page .diet-checkin,
+.bodydata-page .weekly-review,
+.bodydata-page .ai-diet__form,
+.bodydata-page .chat-panel,
+.bodydata-page .data-entry__card,
+.bodydata-page .ai-diet__saved-item,
+.bodydata-page .compare-item,
+.bodydata-page .entry-dialog .measurements__form,
+.bodydata-page .entry-dialog .goals__form,
+.bodydata-page .entry-dialog .goals__result {
+  border-radius: 12px;
+  border-color: rgba(184, 156, 102, 0.18);
+  box-shadow: 0 8px 28px rgba(184, 156, 102, 0.10);
+}
+.bodydata-page .metrics__grid,
+.bodydata-page .analytics__grid,
+.bodydata-page .data-entry__grid,
+.bodydata-page .calc__cards,
+.bodydata-page .ai-diet__extra {
+  gap: 24px;
+}
+.bodydata-page .panel-card,
+.bodydata-page .ai-diet__form,
+.bodydata-page .diet-checkin,
+.bodydata-page .weekly-review {
+  padding: 28px;
+}
+.bodydata-page .metric-card {
+  border: 1px solid rgba(184, 156, 102, 0.16);
+  padding: 36px 24px;
+}
+.bodydata-page .metric-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 38px rgba(184, 156, 102, 0.16);
+}
+.bodydata-page .bmi-guide__row {
+  border-bottom: 1px solid rgba(184, 156, 102, 0.16);
+}
+.bodydata-page .goal-plan__row {
+  border-bottom: 1px solid rgba(184, 156, 102, 0.14);
+}
+
+/* ---------- 2. 输入框：浅米色 + 聚焦金色高亮；下拉适配 ---------- */
+.bodydata-page .el-input__wrapper,
+.bodydata-page .el-textarea__inner {
+  background: #F3EDDF;
+  border-radius: 10px;
+  box-shadow: 0 0 0 1px rgba(184, 156, 102, 0.22) inset;
+  transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+.bodydata-page .el-input__wrapper:hover,
+.bodydata-page .el-textarea__inner:hover {
+  box-shadow: 0 0 0 1px rgba(184, 156, 102, 0.45) inset;
+}
+.bodydata-page .el-input__wrapper.is-focus,
+.bodydata-page .el-textarea__inner:focus {
+  background: #FBF7EC;
+  box-shadow: 0 0 0 1.5px #B89C66 inset, 0 4px 16px rgba(184, 156, 102, 0.16);
+}
+.bodydata-page .el-input__inner::placeholder,
+.bodydata-page .el-textarea__inner::placeholder {
+  color: #B9B2A8;
+}
+.el-select-dropdown__item.is-selected {
+  color: #A08652;
+  font-weight: 600;
+}
+.el-select-dropdown__item:hover,
+.el-select-dropdown__item.is-hovering {
+  background: #F3EDDF;
+}
+.el-popper.is-light {
+  border-radius: 10px;
+  border-color: rgba(184, 156, 102, 0.25);
+  box-shadow: 0 12px 32px rgba(184, 156, 102, 0.14);
+}
+
+/* ---------- 3. 按钮分层 ---------- */
+.bodydata-page .btn-primary {
+  background: linear-gradient(135deg, #C6A878, #B89C66);
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(184, 156, 102, 0.28);
+  transition: transform 0.25s ease, box-shadow 0.25s ease, background 0.25s ease, opacity 0.25s ease;
+}
+.bodydata-page .btn-primary:hover {
+  transform: translateY(-1px);
+  background: linear-gradient(135deg, #C9AD7E, #A08652);
+  box-shadow: 0 10px 24px rgba(184, 156, 102, 0.36);
+}
+.bodydata-page .btn-primary:disabled {
+  opacity: 0.55;
+  transform: none;
+  box-shadow: none;
+}
+.bodydata-page .btn-outline-dark {
+  background: #FFFFFF;
+  color: #A08652;
+  border: 1px solid #B89C66;
+  border-radius: 10px;
+  transition: transform 0.25s ease, background 0.25s ease, box-shadow 0.25s ease;
+}
+.bodydata-page .btn-outline-dark:hover {
+  background: #FBF7EC;
+  color: #A08652;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(184, 156, 102, 0.18);
+}
+.bodydata-page .btn-outline {
+  color: #E8DFCF;
+  border: 1px solid rgba(184, 156, 102, 0.65);
+  border-radius: 10px;
+}
+.bodydata-page .btn-outline:hover {
+  background: rgba(184, 156, 102, 0.16);
+  color: #E8DFCF;
+}
+.bodydata-page .chat-chip {
+  background: #F3EDDF;
+  color: #A08652;
+  border: 1px solid rgba(184, 156, 102, 0.35);
+  border-radius: 999px;
+  padding: 7px 14px;
+}
+.bodydata-page .chat-chip:hover {
+  background: #EADFC7;
+  color: #8A6D3B;
+}
+.bodydata-page .btn-danger-outline {
+  color: #B96A5E;
+  border-color: rgba(185, 106, 94, 0.45);
+  border-radius: 10px;
+}
+.bodydata-page .table-btn {
+  border-radius: 8px;
+  border-color: rgba(184, 156, 102, 0.3);
+  color: #8B7355;
+}
+.bodydata-page .table-btn:hover {
+  border-color: #B89C66;
+  color: #A08652;
+}
+.bodydata-page .table-btn--active {
+  border-color: #B89C66;
+  color: #A08652;
+  background: rgba(184, 156, 102, 0.08);
+}
+.bodydata-page .table-btn--danger {
+  border-color: rgba(185, 106, 94, 0.4);
+  color: #B96A5E;
+}
+
+/* ---------- 4. AI 对话气泡 ---------- */
+.bodydata-page .chat-panel__messages {
+  background: #FCFAF5;
+}
+.bodydata-page .chat-msg--assistant .chat-msg__bubble {
+  background: #F6EEDD;
+  border: 1px solid rgba(184, 156, 102, 0.28);
+  border-left: 3px solid #B89C66;
+  border-radius: 4px 12px 12px 12px;
+}
+.bodydata-page .chat-msg--user .chat-msg__bubble {
+  background: #F0EFEB;
+  color: #1A1A1A;
+  border-radius: 12px 4px 12px 12px;
+}
+.bodydata-page .chat-msg__text pre {
+  color: #4A463F;
+}
+.bodydata-page .chat-panel__input {
+  background: #FFFFFF;
+}
+.bodydata-page .chat-panel__head {
+  background: linear-gradient(135deg, #FFFFFF, #F8F5EF);
+}
+
+/* ---------- 6. 淡入淡出加载动画 ---------- */
+@keyframes goldFadeInUp {
+  from { opacity: 0; transform: translateY(14px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@keyframes goldFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+.bodydata-page .chat-msg {
+  animation: goldFadeInUp 0.4s ease both;
+}
+.bodydata-page .chat-msg__thinking {
+  animation: goldFadeIn 0.3s ease both;
+}
+.bodydata-page .calc__cards .metric-detail-card {
+  animation: goldFadeInUp 0.5s ease both;
+}
+.bodydata-page .calc__cards .metric-detail-card:nth-child(2) { animation-delay: 0.05s; }
+.bodydata-page .calc__cards .metric-detail-card:nth-child(3) { animation-delay: 0.1s; }
+.bodydata-page .calc__cards .metric-detail-card:nth-child(4) { animation-delay: 0.15s; }
+.bodydata-page .calc__cards .metric-detail-card:nth-child(5) { animation-delay: 0.2s; }
+.bodydata-page .calc__cards .metric-detail-card:nth-child(6) { animation-delay: 0.25s; }
+.bodydata-page .calc__cards .metric-detail-card:nth-child(7) { animation-delay: 0.3s; }
+.bodydata-page .panel-card,
+.bodydata-page .data-entry__card {
+  animation: goldFadeInUp 0.5s ease both;
+}
+
+/* 表单参数修改后的淡金色提示小字 */
+.bodydata-page .form-hint {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #A08652;
+  background: rgba(184, 156, 102, 0.10);
+  border: 1px solid rgba(184, 156, 102, 0.28);
+  padding: 7px 12px;
+  border-radius: 8px;
+  animation: goldFadeInUp 0.35s ease both;
+}
+
+/* ---------- 7. 留白与去线条 ---------- */
+.bodydata-page .section {
+  padding: 88px 0;
+}
+.bodydata-page .panel-card__head {
+  margin-bottom: 24px;
+}
+.bodydata-page .metric-detail-card {
+  padding: 20px;
+}
+.bodydata-page .metric-detail-card__bar {
+  margin-top: 8px;
+}
+.bodydata-page .health-tips {
+  padding: 22px 24px;
+}
+.bodydata-page .ai-diet__card {
+  border-radius: 16px;
+  border-color: rgba(184, 156, 102, 0.22);
+  padding: 32px;
+}
+.bodydata-page .ai-diet__saved-item {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 12px;
+}
+.bodydata-page .data-entry__card {
+  border-radius: 16px;
+  padding: 44px 32px;
+}
+.bodydata-page .data-entry__card:hover {
+  border-color: rgba(184, 156, 102, 0.5);
+  box-shadow: 0 16px 44px rgba(184, 156, 102, 0.16);
+}
+.bodydata-page .entry-dialog .measurements__layout,
+.bodydata-page .entry-dialog .goals__layout {
+  gap: 24px;
+}
+.bodydata-page .entry-dialog .measurements__chart {
+  border-radius: 12px;
+}
+.bodydata-page .stage-tag {
+  color: #A08652;
+  border-color: rgba(184, 156, 102, 0.45);
+  border-radius: 6px;
+}
+.bodydata-page .diet-summary__num,
+.bodydata-page .diet-macro__val {
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+/* ================================================================
+   ProfilePage · 个人中心统一视觉规范
+   顶部横幅 #0A0A0A / 页面背景 #F8F5EF / 主色 #B89C66 / hover #A08652
+   ================================================================ */
+.profile-page {
+  --clr-gold: #B89C66;
+  --clr-gold-dark: #A08652;
+  --clr-gold-light: #E2D2AC;
+  --clr-dark: #1A1A1A;
+  --clr-gray: #777777;
+  --clr-gray-light: #A9A29A;
+  --clr-bg-section: #F8F5EF;
+  background: #F8F5EF;
+}
+.profile-page,
+.profile-page * {
+  font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* 通用卡片：12px 圆角 + 柔和金色阴影 */
+.profile-page .p-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(184, 156, 102, 0.16);
+  border-radius: 12px;
+  box-shadow: 0 4px 18px rgba(184, 156, 102, 0.07);
+  padding: 28px;
+}
+.profile-page .p-card__title {
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--clr-dark);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.profile-page .p-card__title .el-icon { color: var(--clr-gold); }
+
+/* 按钮：主按钮实金色 / 次按钮金色描边白底 */
+.profile-page .btn-primary {
+  background: linear-gradient(135deg, #C6A878, #B89C66);
+  border: none;
+  border-radius: 8px;
+  color: #FFFFFF;
+  padding: 10px 22px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.profile-page .btn-primary:hover { background: linear-gradient(135deg, #C9AD7E, #A08652); }
+.profile-page .btn-primary:disabled { opacity: 0.55; cursor: not-allowed; }
+.profile-page .btn-outline {
+  background: #FFFFFF;
+  color: #A08652;
+  border: 1px solid #B89C66;
+  border-radius: 8px;
+  padding: 9px 20px;
+  font-size: 13px;
+  letter-spacing: 1px;
+  cursor: pointer;
+  transition: all 0.25s ease;
+}
+.profile-page .btn-outline:hover { background: #FBF7EC; }
+
+/* 表单：聚焦金色边框高亮 */
+.profile-page .el-input__wrapper,
+.profile-page .el-textarea__inner,
+.profile-page .el-select__wrapper {
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(184, 156, 102, 0.28) inset;
+  transition: box-shadow 0.25s ease, background 0.25s ease;
+}
+.profile-page .el-input__wrapper.is-focus,
+.profile-page .el-select__wrapper.is-focused {
+  box-shadow: 0 0 0 1.5px #B89C66 inset, 0 4px 16px rgba(184, 156, 102, 0.16);
+}
+
+/* 仪表盘统计数字：金色加粗高亮 */
+.profile-page .stat-value {
+  font-family: var(--font-display);
+  font-size: 34px;
+  font-weight: 700;
+  color: #B89C66;
+  line-height: 1.2;
+}
+
+/* 平滑淡入动画 */
+.profile-page .fade-in {
+  animation: profileFadeInUp 0.45s ease both;
+}
+@keyframes profileFadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ================================================================
+   Admin · 管理后台统一样式（以「动作管理」页面为基准）
+   ================================================================ */
+.admin-page .admin-page__toolbar {
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.admin-page .admin-page__count { font-size: 13px; color: #999; }
+.admin-page .el-table th {
+  background: #fafafa !important;
+  color: #555;
+  font-weight: 500;
+  font-size: 13px;
+}
+.admin-page .el-table td { font-size: 13px; }
+.admin-page .el-pagination { margin-top: 16px; justify-content: flex-end; }
+.admin-page .el-dialog .el-form-item__label {
+  font-weight: 500;
+  color: #444;
+  font-size: 13px;
+}

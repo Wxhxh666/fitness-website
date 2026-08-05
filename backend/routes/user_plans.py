@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, request
+from flask import jsonify, request
 from models import db
 from models.plan import Plan
 from models.exercise import ExerciseCategory
@@ -6,7 +6,7 @@ from models.user_plan import UserPlan, TrainingLog
 from utils.auth import require_auth
 from datetime import date
 
-user_plans_bp = Blueprint("user_plans", __name__)
+from . import user_plans_bp
 
 
 @user_plans_bp.route("", methods=["GET"])

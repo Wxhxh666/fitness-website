@@ -1,14 +1,18 @@
 ﻿import random
 import string
 from datetime import datetime, timedelta
-from flask import jsonify, request, Blueprint
+from flask import jsonify, request
 from werkzeug.security import generate_password_hash, check_password_hash
 from models import db
 from utils.auth import generate_token, get_current_user
 from models.auth import User, VerificationCode
 from models.profile_request import ProfileChangeRequest
+from models.body_record import BodyRecord, BodyProfile
+from models.diet_log import DietLog
+from models.diet_plan import DietPlan
+from models.user_plan import UserPlan
 
-auth_bp = Blueprint("auth", __name__)
+from . import auth_bp
 
 
 def generate_code(length=6):
@@ -234,4 +238,119 @@ def update_profile():
     db.session.add(req)
     db.session.commit()
     return jsonify(code=0, msg="申请已提交，等待审核", data={"id": req.id})
+
+
+@auth_bp.route("/bind-phone", methods=["POST"])
+def bind_phone():
+    """绑定 / 更换手机号"""
+    user = get_current_user()
+    if not user:
+        return jsonify(code=401, msg="未登录"), 401
+    data = request.get_json(silent=True) or {}
+    phone = (data.get("phone") or "").strip()
+    if not is_valid_phone(phone):
+        return jsonify(code=400, msg="手机号格式不正确（需11位数字）"), 400
+    existing = User.query.filter_by(phone=phone).first()
+    if existing and existing.id != user.id:
+        return jsonify(code=400, msg="该手机号已被其他账号绑定"), 400
+    user.phone = phone
+    db.session.commit()
+    return jsonify(code=0, msg="手机号绑定成功", data={"phone": user.phone})
+
+
+@auth_bp.route("/change-password", methods=["POST"])
+def change_password():
+    """修改登录密码（校验原密码）"""
+    user = get_current_user()
+    if not user:
+        return jsonify(code=401, msg="未登录"), 401
+    data = request.get_json(silent=True) or {}
+    old_password = data.get("old_password") or ""
+    new_password = (data.get("new_password") or "").strip()
+    if len(new_password) < 6:
+        return jsonify(code=400, msg="新密码至少6位"), 400
+    if user.password_hash and not check_password_hash(user.password_hash, old_password):
+        return jsonify(code=400, msg="原密码不正确"), 400
+    user.password_hash = generate_password_hash(new_password)
+    db.session.commit()
+    return jsonify(code=0, msg="密码修改成功")
+
+
+@auth_bp.route("/preferences", methods=["GET"])
+def get_preferences():
+    """读取系统偏好（AI模型 / 度量单位 / 通知开关）"""
+    user = get_current_user()
+    if not user:
+        return jsonify(code=401, msg="未登录"), 401
+    return jsonify(code=0, msg="success", data={
+        "ai_model": user.ai_model or "deepseek-flash",
+        "unit_system": user.unit_system or "metric",
+        "notification_enabled": bool(user.notification_enabled),
+    })
+
+
+@auth_bp.route("/preferences", methods=["PUT"])
+def update_preferences():
+    """保存系统偏好到用户表（同步身材档案的单位）"""
+    user = get_current_user()
+    if not user:
+        return jsonify(code=401, msg="未登录"), 401
+    data = request.get_json(silent=True) or {}
+    if "ai_model" in data:
+        model = data["ai_model"]
+        if model not in ("deepseek-flash", "doubao-lite"):
+            return jsonify(code=400, msg="不支持的AI模型"), 400
+        user.ai_model = model
+    if "unit_system" in data:
+        unit = data["unit_system"]
+        if unit not in ("metric", "imperial"):
+            return jsonify(code=400, msg="不支持的度量单位"), 400
+        user.unit_system = unit
+        # 同步到身材档案，保持 BodyData 页面单位一致
+        bp = BodyProfile.query.filter_by(user_id=user.id).first()
+        if bp:
+            bp.unit_system = unit
+    if "notification_enabled" in data:
+        user.notification_enabled = bool(data["notification_enabled"])
+    db.session.commit()
+    return jsonify(code=0, msg="偏好已保存", data={
+        "ai_model": user.ai_model,
+        "unit_system": user.unit_system,
+        "notification_enabled": bool(user.notification_enabled),
+    })
+
+
+@auth_bp.route("/dashboard-stats", methods=["GET"])
+def dashboard_stats():
+    """个人中心仪表盘：统计数字 + 近30天体重序列 + 最新身材记录"""
+    user = get_current_user()
+    if not user:
+        return jsonify(code=401, msg="未登录"), 401
+    uid = user.id
+    measurement_count = BodyRecord.query.filter_by(user_id=uid).count()
+    diet_plan_count = DietPlan.query.filter_by(user_id=uid).count()
+    plan_count = UserPlan.query.filter_by(user_id=uid).count()
+    checkin_days = db.session.query(DietLog.log_date).filter_by(user_id=uid).distinct().count()
+
+    since = (datetime.utcnow() - timedelta(days=29)).strftime("%Y-%m-%d")
+    weights = BodyRecord.query.filter(
+        BodyRecord.user_id == uid,
+        BodyRecord.record_date >= since,
+        BodyRecord.weight_kg.isnot(None),
+    ).order_by(BodyRecord.record_date.asc(), BodyRecord.id.asc()).all()
+    weight_series = [{"date": r.record_date, "weight_kg": r.weight_kg} for r in weights]
+
+    latest = BodyRecord.query.filter_by(user_id=uid).order_by(
+        BodyRecord.record_date.desc(), BodyRecord.id.desc()
+    ).first()
+    return jsonify(code=0, msg="success", data={
+        "stats": {
+            "measurements": measurement_count,
+            "diet_plans": diet_plan_count,
+            "plans": plan_count,
+            "checkin_days": checkin_days,
+        },
+        "weight_series": weight_series,
+        "latest_record": latest.to_dict() if latest else None,
+    })
 

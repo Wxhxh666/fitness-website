@@ -41,3 +41,8 @@ class Config:
     DEEPSEEK_MODEL = os.environ.get("DEEPSEEK_MODEL", "deepseek-v4-flash")
     DEEPSEEK_MOCK = os.environ.get("DEEPSEEK_MOCK", "0") == "1"
     DEEPSEEK_TIMEOUT = 120
+
+    # Doubao (火山方舟) AI 支持（可选，配置了 key 才启用 doubao-lite）
+    DOUBAO_API_KEY = os.environ.get("DOUBAO_API_KEY", "")
+    DOUBAO_BASE_URL = os.environ.get("DOUBAO_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3")
+    DOUBAO_MODEL = os.environ.get("DOUBAO_MODEL", "doubao-lite")

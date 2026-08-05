@@ -1,7 +1,7 @@
 ﻿<template>
   <div class="admin-page">
     <div class="admin-page__toolbar">
-      <span class="admin-page__count">鍏?{{ total }} 鏉＄暀瑷€</span>
+      <span class="admin-page__count">共{{ total }} 条记录</span>
     </div>
     <el-table :data="messages" stripe style="width:100%" v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />

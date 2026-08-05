@@ -1,10 +1,10 @@
 ﻿import os
 import uuid
-from flask import Blueprint, jsonify, request, current_app
+from flask import jsonify, request, current_app
 from werkzeug.utils import secure_filename
 from utils.auth import require_auth
 
-upload_bp = Blueprint("upload", __name__)
+from . import upload_bp
 
 ALLOWED_EXTENSIONS = {"png", "jpg", "jpeg", "gif", "webp"}
 VIDEO_EXTENSIONS = {"mp4", "webm", "mov", "avi", "mkv"}

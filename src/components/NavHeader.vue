@@ -21,7 +21,7 @@
         <template v-if="isLoggedIn">
           <div class="nav-header__avatar-wrap" @mouseenter="showDropdown=true" @mouseleave="showDropdown=false">
             <div class="nav-header__avatar">
-              <img v-if="user?.avatar_url" :src="user.avatar_url" class="nav-header__avatar-img" />
+              <img v-if="user?.avatar_url" :src="fullUrl(user.avatar_url)" class="nav-header__avatar-img" />
               <span v-else>{{ avatarLetter }}</span>
             </div>
             <transition name="dropdown-fade">
@@ -70,7 +70,7 @@
 <script setup lang="ts">
 import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { isLoggedIn as checkLogin, getUser, removeToken } from '@/api'
+import { isLoggedIn as checkLogin, getUser, removeToken, API_BASE_URL } from '@/api'
 
 const route = useRoute()
 const isScrolled = ref(false)
@@ -78,6 +78,13 @@ const mobileMenuOpen = ref(false)
 const showDropdown = ref(false)
 const isLoggedIn = ref(checkLogin())
 const user = ref(getUser())
+
+/** 将后端返回的相对路径（/static/...）补全为完整 URL，否则会解析到前端端口导致 404 */
+function fullUrl(path?: string) {
+  if (!path) return ''
+  if (path.startsWith('http')) return path
+  return API_BASE_URL.replace(/\/api$/, '') + path
+}
 
 // Update auth state on route change (NavHeader is outside router-view)
 watch(() => route.path, () => {

@@ -5,9 +5,9 @@
     </div>
     <el-table :data="users" stripe style="width:100%" v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />
-      <el-table-column prop="nickname" label="昵称" width="130" />
-      <el-table-column prop="email" label="邮箱" width="200" />
-      <el-table-column prop="phone" label="手机号" width="140" />
+      <el-table-column prop="nickname" label="昵称" min-width="120" show-overflow-tooltip />
+      <el-table-column prop="email" label="邮箱" min-width="180" show-overflow-tooltip />
+      <el-table-column prop="phone" label="手机号" min-width="130" />
       <el-table-column label="角色" width="80" align="center">
         <template #default="{ row }">
           <el-tag :type="row.is_admin ? 'danger' : 'info'" size="small">{{ row.is_admin ? "管理员" : "用户" }}</el-tag>
@@ -18,10 +18,11 @@
           <el-tag :type="row.is_active ? 'success' : 'danger'" size="small">{{ row.is_active ? "正常" : "禁用" }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column label="注册时间" width="160">
+      <el-table-column label="注册时间" min-width="150">
         <template #default="{ row }">{{ row.created_at?.slice(0,16)?.replace("T"," ") }}</template>
       </el-table-column>
-      <el-table-column label="操作" width="100" align="center">
+      <!-- 操作列固定在最后，不参与拉伸 -->
+      <el-table-column label="操作" width="110" align="center" fixed="right">
         <template #default="{ row }">
           <el-button v-if="!row.is_admin" :type="row.is_active ? 'warning' : 'success'" size="small" @click="toggleStatus(row)" :disabled="togglingId === row.id">
             {{ row.is_active ? "禁用" : "启用" }}

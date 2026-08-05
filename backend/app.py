@@ -38,7 +38,7 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix="/api/auth")
     app.register_blueprint(upload_bp, url_prefix="/api")
     app.register_blueprint(admin_bp, url_prefix="/api/admin")
-    app.register_blueprint(user_plans_bp, url_prefix="/api/plans/user")
+    app.register_blueprint(user_plans_bp, url_prefix="/api/user-plans")
     app.register_blueprint(ai_bp, url_prefix="/api/ai")
 
     # Root - API index

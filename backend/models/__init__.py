@@ -38,3 +38,4 @@ from .exercise import Exercise, ExerciseCategory
 from .plan import Plan, PlanGoal
 from .profile_request import ProfileChangeRequest
 from .site import SiteInfo
+from .weekly_review import WeeklyReview

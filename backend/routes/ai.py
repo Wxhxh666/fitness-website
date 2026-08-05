@@ -11,6 +11,8 @@ from models import db
 from models.diet_plan import DietPlan
 from models.diet_log import DietLog
 from models.body_record import BodyRecord
+from models.weekly_review import WeeklyReview
+from models.auth import User
 from routes.body_metrics import compute_metrics, ACTIVITY_LABELS, GENDER_LABELS
 
 
@@ -81,11 +83,11 @@ def build_diet_prompt(data, user_message=""):
     return prompt
 
 
-def call_deepseek(prompt, history=None):
+def call_deepseek(prompt, history=None, model_override=None):
     """调用 DeepSeek Chat Completions API"""
     key = current_app.config.get("DEEPSEEK_API_KEY", "")
     base = current_app.config.get("DEEPSEEK_BASE_URL", "https://api.deepseek.com").rstrip("/")
-    model = current_app.config.get("DEEPSEEK_MODEL", "deepseek-chat")
+    model = model_override or current_app.config.get("DEEPSEEK_MODEL", "deepseek-chat")
     timeout = current_app.config.get("DEEPSEEK_TIMEOUT", 120)
 
     url = base + "/chat/completions"
@@ -121,6 +123,35 @@ def call_deepseek(prompt, history=None):
     if not content.strip():
         content = message.get("reasoning_content") or ""
     return content
+
+
+def call_llm(prompt, model_pref="deepseek-flash"):
+    """按用户偏好选择模型：doubao-lite 走火山方舟，其余走 DeepSeek；未配置方舟 key 时自动降级"""
+    if model_pref == "doubao-lite":
+        key = current_app.config.get("DOUBAO_API_KEY", "")
+        if key:
+            base = current_app.config.get("DOUBAO_BASE_URL", "https://ark.cn-beijing.volces.com/api/v3").rstrip("/")
+            model = current_app.config.get("DOUBAO_MODEL", "doubao-lite")
+            url = base + "/chat/completions"
+            headers = {"Authorization": f"Bearer {key}", "Content-Type": "application/json"}
+            payload = {
+                "model": model,
+                "messages": [
+                    {"role": "system", "content": "你是专业的健身教练与营养师。"},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": 0.7,
+                "max_tokens": 4000,
+                "stream": False,
+            }
+            try:
+                resp = requests.post(url, json=payload, headers=headers, timeout=current_app.config.get("DEEPSEEK_TIMEOUT", 120))
+                resp.raise_for_status()
+                data = resp.json()
+                return data["choices"][0]["message"].get("content") or ""
+            except requests.RequestException:
+                pass  # 方舟调用失败，降级到 DeepSeek
+    return call_deepseek(prompt)
 
 
 def parse_plan_json(content):
@@ -519,6 +550,14 @@ def mock_review(s):
     return "\n".join(parts)
 
 
+def _save_review(user_id, week_start, review_text, summary, model):
+    """将 AI 周复盘写入数据库"""
+    wr = WeeklyReview(user_id=user_id, week_start=week_start, review_text=review_text, summary_json=summary, model=model)
+    db.session.add(wr)
+    db.session.commit()
+    return wr
+
+
 @ai_bp.route("/weekly-review", methods=["POST"])
 def weekly_review():
     user_id = _current_user_id()
@@ -526,20 +565,32 @@ def weekly_review():
     prompt = build_review_prompt(summary)
     mock = current_app.config.get("DEEPSEEK_MOCK", False) or not current_app.config.get("DEEPSEEK_API_KEY", "")
 
+    # 读取用户默认 AI 模型偏好（deepseek-flash / doubao-lite）
+    pref_user = User.query.get(user_id)
+    model_pref = (pref_user.ai_model if pref_user else "") or "deepseek-flash"
+    week_start = (date.today() - timedelta(days=date.today().weekday())).strftime("%Y-%m-%d")
+
     if mock:
+        review_text = mock_review(summary)
+        _save_review(user_id, week_start, review_text, summary, "demo")
         return jsonify(code=0, msg="success", data={
-            "review_text": mock_review(summary),
+            "review_text": review_text,
             "summary": summary,
             "mock": True,
+            "model": "demo",
+            "stored": True,
         })
     try:
-        content = call_deepseek(prompt)
+        content = call_llm(prompt, model_pref)
     except requests.RequestException as e:
         return jsonify(code=502, msg=f"AI 服务调用失败：{e}"), 502
     except Exception as e:
         return jsonify(code=502, msg=f"AI 服务异常：{e}"), 502
+    _save_review(user_id, week_start, content, summary, model_pref)
     return jsonify(code=0, msg="success", data={
         "review_text": content,
         "summary": summary,
         "mock": False,
+        "model": model_pref,
+        "stored": True,
     })

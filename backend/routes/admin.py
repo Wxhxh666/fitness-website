@@ -7,7 +7,7 @@ from models.body_metric import BodyMetric
 from models.contact import ContactMessage
 from utils.auth import require_admin
 
-admin_bp = Blueprint("admin", __name__)
+from . import admin_bp
 
 
 @admin_bp.route("/dashboard", methods=["GET"])
@@ -73,6 +73,45 @@ def get_exercises(user):
 def get_plans(user):
     items = Plan.query.order_by(Plan.id).all()
     return jsonify(code=0, msg="success", data={"items": [p.to_dict() for p in items], "total": len(items)})
+
+
+@admin_bp.route("/plans/<int:plan_id>/toggle-status", methods=["PUT"])
+@require_admin
+def toggle_plan_status(user, plan_id):
+    """计划上架 / 下架"""
+    plan = Plan.query.get_or_404(plan_id)
+    plan.is_active = not plan.is_active
+    db.session.commit()
+    return jsonify(code=0, msg="success", data=plan.to_dict())
+
+
+@admin_bp.route("/plans", methods=["POST"])
+@require_admin
+def create_plan(user):
+    """新增训练计划"""
+    data = request.get_json(silent=True) or {}
+    name = (data.get("name") or "").strip()
+    if not name:
+        return jsonify(code=400, msg="计划名称不能为空"), 400
+    difficulty = data.get("difficulty", "intermediate")
+    diff_map = {"beginner": "入门", "intermediate": "中级", "advanced": "高级"}
+    plan = Plan(
+        name=name,
+        goal=(data.get("goal") or "muscle").strip(),
+        badge=(data.get("badge") or "推荐").strip(),
+        description=(data.get("description") or "").strip(),
+        duration=(data.get("duration") or "").strip(),
+        frequency=(data.get("frequency") or "").strip(),
+        difficulty=difficulty,
+        difficulty_label=diff_map.get(difficulty, "中级"),
+        focus_tags=data.get("focus_tags", []),
+        cover_url=(data.get("cover_url") or "").strip(),
+        weekly_schedule=data.get("weekly_schedule", []),
+        is_active=True,
+    )
+    db.session.add(plan)
+    db.session.commit()
+    return jsonify(code=0, msg="计划创建成功", data=plan.to_dict()), 201
 
 
 @admin_bp.route("/body-metrics", methods=["GET"])
