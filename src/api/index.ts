@@ -27,8 +27,11 @@ export function setUser(user: any) {
 export function isLoggedIn(): boolean {
   return !!getToken()
 }
+// 后端地址：默认走 127.0.0.1:8000，可用 VITE_API_BASE 环境变量覆盖（部署时无需改代码）
+export const API_BASE_URL: string = (import.meta.env.VITE_API_BASE as string) || 'http://127.0.0.1:8000/api'
+
 const http = axios.create({
-  baseURL: 'http://127.0.0.1:8000/api',
+  baseURL: API_BASE_URL,
   timeout: 10000,
   headers: { 'Content-Type': 'application/json' },
 })

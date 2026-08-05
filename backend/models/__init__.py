@@ -31,3 +31,10 @@ from .user_plan import UserPlan, TrainingLog
 from .body_record import BodyRecord, BodyGoal, BodyProfile
 from .diet_plan import DietPlan
 from .diet_log import DietLog
+from .auth import User, VerificationCode
+from .body_metric import BodyMetric
+from .contact import ContactMessage
+from .exercise import Exercise, ExerciseCategory
+from .plan import Plan, PlanGoal
+from .profile_request import ProfileChangeRequest
+from .site import SiteInfo

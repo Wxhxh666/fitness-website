@@ -65,7 +65,7 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from "vue"
-import { getProfile, updateProfile, setUser, getUser } from "@/api"
+import { getProfile, updateProfile, setUser, getUser, API_BASE_URL } from "@/api"
 import axios from "axios"
 import { ElMessage } from "element-plus"
 
@@ -107,7 +107,7 @@ async function onFileSelected(e: Event) {
   try {
     const formData = new FormData()
     formData.append("file", file)
-    const res = await axios.post("http://127.0.0.1:8000/api/upload", formData)
+    const res = await axios.post(API_BASE_URL + "/upload", formData)
     const url = res.data.data?.url || res.data.url
     if (url) {
       editAvatar.value = url

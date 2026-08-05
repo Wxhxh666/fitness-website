@@ -7,7 +7,9 @@ from models import db
 def create_app():
     app = Flask(__name__)
     app.config.from_object(Config)
-    app.config['MAX_CONTENT_LENGTH'] = 3 * 1024 * 1024
+    # 全局上限需 >= 上传接口允许的最大值（upload.py: 图片 2MB / 视频 200MB），
+    # 具体类型限制由 upload.py 内校验
+    app.config['MAX_CONTENT_LENGTH'] = 200 * 1024 * 1024
 
     # CORS
     origins = app.config.get("CORS_ORIGINS", "*")

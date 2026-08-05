@@ -102,7 +102,7 @@ import { getAdminExercises, getExerciseCategories, toggleExerciseStatus, createE
 import { ElMessage } from "element-plus"
 import type { FormInstance } from "element-plus"
 import axios from "axios"
-import { getToken } from "@/api"
+import { getToken, API_BASE_URL } from "@/api"
 
 const exercises = ref<any[]>([])
 const total = ref(0)
@@ -192,7 +192,7 @@ async function onVideoFileSelected(e: Event) {
 
   try {
     const token = getToken()
-    const res = await axios.post("http://127.0.0.1:8000/api/upload", formData, {
+    const res = await axios.post(API_BASE_URL + "/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         "Authorization": token ? "Bearer " + token : "",
@@ -227,7 +227,7 @@ async function onCoverImageSelected(e: Event) {
 
   try {
     const token = getToken()
-    const res = await axios.post("http://127.0.0.1:8000/api/upload", formData, {
+    const res = await axios.post(API_BASE_URL + "/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",
         "Authorization": token ? "Bearer " + token : "",
