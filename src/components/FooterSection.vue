@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <footer class="site-footer">
     <div class="container">
       <div class="site-footer__grid">
@@ -45,7 +45,7 @@
 .site-footer {
   background: var(--clr-bg-dark); color: var(--clr-gray-lighter);
   padding: 80px 0 40px;
-  border-top: 1px solid rgba(201, 169, 110, 0.1);
+  border-top: 1px solid rgba(12, 216, 160, 0.1);
 }
 .site-footer__grid {
   display: grid; grid-template-columns: 1.8fr 1fr 1fr 1fr; gap: 48px; margin-bottom: 60px;

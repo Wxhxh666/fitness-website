@@ -84,14 +84,14 @@ onMounted(loadPlans)
 .mpl-list { display: flex; flex-direction: column; gap: 12px; }
 .mpl-item {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  background: #FBF8F2; border: 1px solid rgba(184, 156, 102, 0.18);
+  background: #EAF6F2; border: 1px solid rgba(12, 216, 160, 0.18);
   border-radius: 10px; padding: 14px 18px;
 }
 .mpl-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .mpl-name { font-size: 14px; font-weight: 500; color: var(--clr-dark); }
 .mpl-tag {
   font-size: 11px; color: var(--clr-gold-dark);
-  border: 1px solid rgba(184, 156, 102, 0.4); border-radius: 6px; padding: 2px 8px;
+  border: 1px solid rgba(12, 216, 160, 0.4); border-radius: 6px; padding: 2px 8px;
 }
 .mpl-meta { font-size: 12px; color: var(--clr-gray); }
 .mpl-actions { flex-shrink: 0; }

@@ -21,7 +21,7 @@
             </el-select>
             <span class="measurements__chart-hint">最近 {{ measChartItems.length }} 次测量（{{ cmUnit }}）</span>
           </div>
-          <BarChart :items="measChartItems" :unit="cmUnit" color="#c9a96e" />
+          <BarChart :items="measChartItems" :unit="cmUnit" color="#0CD8A0" />
         </div>
       </div>
     </div>

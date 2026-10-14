@@ -53,13 +53,13 @@ const activeMenu = ref('basic')
 .profile-hero__bg {
   position: absolute;
   inset: 0;
-  background: radial-gradient(ellipse at 30% 60%, rgba(184, 156, 102, 0.08), transparent 50%);
+  background: radial-gradient(ellipse at 30% 60%, rgba(12, 216, 160, 0.08), transparent 50%);
 }
 .profile-hero__content { position: relative; z-index: 1; }
 .profile-hero__label {
   font-size: 11px;
   letter-spacing: 4px;
-  color: #B89C66;
+  color: #0CD8A0;
   margin-bottom: 16px;
   display: inline-block;
 }

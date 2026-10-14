@@ -223,7 +223,7 @@ async function submitPassword() {
   display: flex;
   gap: 28px;
   padding: 22px 0;
-  border-bottom: 1px solid rgba(184, 156, 102, 0.14);
+  border-bottom: 1px solid rgba(12, 216, 160, 0.14);
 }
 .bi-row--last { border-bottom: none; }
 .bi-label { width: 96px; flex-shrink: 0; font-size: 14px; color: var(--clr-gray); padding-top: 8px; letter-spacing: 1px; }
@@ -231,7 +231,7 @@ async function submitPassword() {
 .bi-inline { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 .bi-avatar {
   width: 72px; height: 72px; border-radius: 50%;
-  background: linear-gradient(135deg, #C6A878, #B89C66);
+  background: linear-gradient(135deg, #B6FF3C, #0CD8A0);
   display: flex; align-items: center; justify-content: center;
   font-size: 26px; color: #fff; font-weight: 500;
   position: relative; overflow: hidden; cursor: pointer;
@@ -245,7 +245,7 @@ async function submitPassword() {
 }
 .bi-pending {
   font-size: 12px; color: var(--clr-gold-dark);
-  padding: 3px 10px; border: 1px solid rgba(184, 156, 102, 0.45); border-radius: 6px;
+  padding: 3px 10px; border: 1px solid rgba(12, 216, 160, 0.45); border-radius: 6px;
 }
 .bi-muted { font-size: 12px; color: var(--clr-gray-light); }
 .bi-current { font-size: 12px; color: var(--clr-gray-light); margin-top: 6px; }

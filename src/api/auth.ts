@@ -1,40 +1,26 @@
 import http from './http'
 
-// ---------- Auth ----------
-export function sendVerificationCode(identifier: string, purpose = 'login') {
-  return http.post('/auth/send-code', { identifier, purpose })
+// ---------- Auth（账号 + 密码，已移除验证码流程） ----------
+export interface AuthResult {
+  user_id: number
+  nickname: string
+  token: string
+  is_admin?: boolean
+  avatar_url?: string | null
 }
 
-export function registerWithCode(identifier: string, code: string, password: string) {
-  return http.post('/auth/register', { identifier, code, password })
+/** 注册：仅需账号（手机号/邮箱）+ 密码 */
+export function registerWithPassword(identifier: string, password: string) {
+  return http.post<any, { code: number; msg: string; data: AuthResult }>('/auth/register', { identifier, password })
 }
 
-export function loginWithCode(identifier: string, code: string) {
-  return http.post('/auth/login', { identifier, code })
-}
-
+/** 登录：仅需账号（手机号/邮箱）+ 密码 */
 export function loginWithPassword(identifier: string, password: string) {
-  return http.post('/auth/password-login', { identifier, password })
+  return http.post<any, { code: number; msg: string; data: AuthResult }>('/auth/password-login', { identifier, password })
 }
 
 export function fetchCurrentUser() {
   return http.get<any, { code: number; data: any }>('/auth/me')
-}
-
-export function loginUser(identifier: string, code: string) {
-  return http.post<any, { code: number; data: { user_id: number; nickname: string; token: string } }>('/auth/login', { identifier, code })
-}
-
-export function registerUser(identifier: string, code: string, password: string) {
-  return http.post<any, { code: number; data: { user_id: number; nickname: string; token: string } }>('/auth/register', { identifier, code, password })
-}
-
-export function passwordLogin(identifier: string, password: string) {
-  return http.post<any, { code: number; data: { user_id: number; nickname: string; token: string } }>('/auth/password-login', { identifier, password })
-}
-
-export function sendCode(identifier: string, purpose = 'login') {
-  return http.post<any, { code: number; data: { debug_code: string } }>('/auth/send-code', { identifier, purpose })
 }
 
 // ---------- Profile ----------

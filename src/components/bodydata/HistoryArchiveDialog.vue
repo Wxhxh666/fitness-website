@@ -189,7 +189,7 @@ async function onExport() {
 .btn-danger-outline:hover { background: rgba(179, 85, 74, 0.08); }
 .btn-text { background: none; border: none; color: var(--clr-gray); font-size: 13px; letter-spacing: 1px; cursor: pointer; padding: 8px 4px; transition: var(--transition-default); }
 .btn-text:hover { color: var(--clr-gold-dark); }
-.compare-panel { margin-top: 16px; background: rgba(201, 169, 110, 0.07); border: 1px solid rgba(201, 169, 110, 0.35); padding: 18px 20px; margin-bottom: 18px; }
+.compare-panel { margin-top: 16px; background: rgba(12, 216, 160, 0.07); border: 1px solid rgba(12, 216, 160, 0.35); padding: 18px 20px; margin-bottom: 18px; }
 .compare-panel--light .compare-panel__title { color: var(--clr-dark); }
 .compare-panel--light .compare-panel__summary { color: var(--clr-gray-deep); }
 .compare-panel--light .compare-item { background: var(--clr-white); }
@@ -205,7 +205,7 @@ async function onExport() {
 .compare-item__diff { font-size: 13px; font-weight: 500; }
 .compare-item__diff.good { color: #5d8a5d; }
 .compare-item__diff.bad { color: #b3554a; }
-.stage-tag { font-size: 11px; padding: 2px 8px; border: 1px solid rgba(201, 169, 110, 0.45); color: var(--clr-gold-dark); }
+.stage-tag { font-size: 11px; padding: 2px 8px; border: 1px solid rgba(12, 216, 160, 0.45); color: var(--clr-gold-dark); }
 .stage-tag--none { border-color: rgba(0, 0, 0, 0.15); color: var(--clr-gray); }
 .table-btn { background: transparent; border: 1px solid rgba(0, 0, 0, 0.2); color: var(--clr-gray-deep); font-size: 12px; padding: 4px 12px; cursor: pointer; margin-right: 8px; transition: var(--transition-default); }
 .table-btn:hover { border-color: var(--clr-gold); color: var(--clr-gold-dark); }

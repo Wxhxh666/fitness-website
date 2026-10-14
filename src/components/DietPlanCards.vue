@@ -64,7 +64,7 @@ defineProps<{ plan: any }>()
 <style scoped>
 .diet-summary {
   background: var(--clr-bg-section);
-  border: 1px solid rgba(201, 169, 110, 0.25);
+  border: 1px solid rgba(12, 216, 160, 0.25);
   padding: 22px 24px;
   margin-bottom: 18px;
 }
@@ -101,36 +101,36 @@ defineProps<{ plan: any }>()
 }
 /* FITLUXE 质感升级：数值金色放大加粗、卡片圆角阴影 */
 .diet-summary {
-  background: linear-gradient(135deg, #FBF7EC, #F6EEDD);
-  border: 1px solid rgba(184, 156, 102, 0.3);
+  background: linear-gradient(135deg, #EAF6F2, #EAF6F2);
+  border: 1px solid rgba(12, 216, 160, 0.3);
   border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(184, 156, 102, 0.12);
+  box-shadow: 0 8px 24px rgba(12, 216, 160, 0.12);
 }
 .diet-summary__num {
   font-size: 52px;
   font-weight: 700;
-  color: #B89C66;
+  color: #0CD8A0;
   letter-spacing: -1px;
   font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 .diet-summary__unit {
-  color: #8B7355;
+  color: #0BB37C;
   font-weight: 500;
 }
 .diet-macro {
   background: #FFFFFF;
-  border: 1px solid rgba(184, 156, 102, 0.2);
+  border: 1px solid rgba(12, 216, 160, 0.2);
   border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(184, 156, 102, 0.08);
+  box-shadow: 0 4px 14px rgba(12, 216, 160, 0.08);
 }
 .diet-macro__val {
   font-size: 28px;
   font-weight: 700;
-  color: #B89C66;
+  color: #0CD8A0;
   font-family: "Noto Sans SC", "PingFang SC", "Microsoft YaHei", sans-serif;
 }
 .diet-macro__label {
-  color: #8B7355;
+  color: #0BB37C;
   font-weight: 500;
   letter-spacing: 1px;
 }
@@ -138,17 +138,17 @@ defineProps<{ plan: any }>()
   color: #6F675D;
 }
 .diet-meal {
-  border: 1px solid rgba(184, 156, 102, 0.16);
+  border: 1px solid rgba(12, 216, 160, 0.16);
   border-radius: 12px;
-  box-shadow: 0 6px 20px rgba(184, 156, 102, 0.08);
+  box-shadow: 0 6px 20px rgba(12, 216, 160, 0.08);
 }
 .diet-meal__name {
-  border-left: 3px solid #B89C66;
+  border-left: 3px solid #0CD8A0;
   color: #1A1A1A;
   font-weight: 600;
 }
 .diet-meal__cal {
-  color: #B89C66;
+  color: #0CD8A0;
   font-weight: 700;
   font-size: 13px;
 }
@@ -156,18 +156,18 @@ defineProps<{ plan: any }>()
   font-weight: 500;
 }
 .diet-block {
-  border: 1px solid rgba(184, 156, 102, 0.16);
+  border: 1px solid rgba(12, 216, 160, 0.16);
   border-radius: 12px;
-  box-shadow: 0 4px 14px rgba(184, 156, 102, 0.06);
+  box-shadow: 0 4px 14px rgba(12, 216, 160, 0.06);
 }
 .diet-block__title {
   color: #1A1A1A;
   font-weight: 600;
 }
 .diet-block__title .el-icon {
-  color: #B89C66;
+  color: #0CD8A0;
 }
 .diet-block__list li::before {
-  background: #B89C66;
+  background: #0CD8A0;
 }
 </style>

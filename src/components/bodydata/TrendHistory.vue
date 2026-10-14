@@ -32,7 +32,7 @@
           <el-radio-button value="month">按月</el-radio-button>
         </el-radio-group>
       </div>
-      <LineChart :items="trendItems" :unit="trendUnit" color="#c9a96e" />
+      <LineChart :items="trendItems" :unit="trendUnit" color="#0CD8A0" />
       <div class="trend-foot">
         <span class="trend-foot__hint">选择两条记录可自动生成对比小结</span>
         <button class="btn-outline-dark trend-foot__btn" @click="emit('open-history')">数据存档与对比</button>

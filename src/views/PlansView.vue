@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="plans-page">
     <section class="page-hero">
       <div class="page-hero__bg"></div>
@@ -431,7 +431,7 @@ onMounted(async () => {
 .page-hero__desc { font-size:15px; color:var(--clr-gray-light); max-width:500px; }
 
 .plans__tabs { display:flex; gap:12px; margin-bottom:0; }
-.sync-banner { background: var(--clr-white); border: 1px solid rgba(201, 169, 110, 0.35); padding: 20px 24px; }
+.sync-banner { background: var(--clr-white); border: 1px solid rgba(12, 216, 160, 0.35); padding: 20px 24px; }
 .sync-banner__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
 .sync-banner__label { font-size: 11px; letter-spacing: 3px; color: var(--clr-gold); }
 .sync-banner__close { background: none; border: none; color: var(--clr-gray-light); cursor: pointer; font-size: 16px; }
@@ -465,7 +465,7 @@ onMounted(async () => {
 .plan-card__spec { text-align:center; display:flex; flex-direction:column; gap:4px; }
 .plan-card__spec-label { font-size:10px; letter-spacing:2px; color:var(--clr-gray-light); text-transform:uppercase; }
 .plan-card__spec-value { font-family:var(--font-display); font-size:15px; color:var(--clr-dark); }
-.plan-card__diff.diff--beginner { color:#6b8e6b; } .plan-card__diff.diff--intermediate { color:#c9a96e; } .plan-card__diff.diff--advanced { color:#c0392b; }
+.plan-card__diff.diff--beginner { color:#6b8e6b; } .plan-card__diff.diff--intermediate { color:#0CD8A0; } .plan-card__diff.diff--advanced { color:#c0392b; }
 .plan-card__focus { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:24px; }
 .plan-card__focus-tag { font-size:11px; letter-spacing:1px; padding:4px 12px; background:var(--clr-bg-section); color:var(--clr-gray); }
 .plan-card__actions { display:flex; gap:8px; flex-wrap:wrap; align-items:center; }

@@ -98,8 +98,8 @@ function renderChart() {
         smooth: true,
         symbol: 'circle',
         symbolSize: 5,
-        lineStyle: { color: '#B89C66', width: 2 },
-        itemStyle: { color: '#B89C66' },
+        lineStyle: { color: '#0CD8A0', width: 2 },
+        itemStyle: { color: '#0CD8A0' },
         areaStyle: { color: 'rgba(184,156,102,0.12)' },
       },
     ],
@@ -131,8 +131,8 @@ onBeforeUnmount(() => {
 <style scoped>
 .dash-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; margin-bottom: 22px; }
 .dash-stat {
-  background: #FBF8F2;
-  border: 1px solid rgba(184, 156, 102, 0.18);
+  background: #EAF6F2;
+  border: 1px solid rgba(12, 216, 160, 0.18);
   border-radius: 10px;
   padding: 18px 14px;
   display: flex;
@@ -141,7 +141,7 @@ onBeforeUnmount(() => {
   text-align: center;
 }
 .dash-stat__label { font-size: 12px; color: var(--clr-gray); letter-spacing: 1px; }
-.dash-chart { border: 1px solid rgba(184, 156, 102, 0.16); border-radius: 10px; padding: 16px; margin-bottom: 22px; }
+.dash-chart { border: 1px solid rgba(12, 216, 160, 0.16); border-radius: 10px; padding: 16px; margin-bottom: 22px; }
 .dash-chart__head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 .dash-chart__title { font-size: 13px; font-weight: 500; color: var(--clr-dark); }
 .dash-chart__empty { font-size: 12px; color: var(--clr-gray-light); }

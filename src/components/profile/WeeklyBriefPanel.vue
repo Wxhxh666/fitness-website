@@ -102,12 +102,12 @@ onMounted(loadBrief)
 
 <style scoped>
 .p-empty { padding: 60px 20px; text-align: center; color: var(--clr-gray); font-size: 14px; }
-.wb-section { padding: 18px 0; border-bottom: 1px solid rgba(184, 156, 102, 0.14); }
+.wb-section { padding: 18px 0; border-bottom: 1px solid rgba(12, 216, 160, 0.14); }
 .wb-section--last { border-bottom: none; }
 .wb-title { font-size: 14px; font-weight: 500; color: var(--clr-dark); margin-bottom: 12px; }
 .wb-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; }
 .wb-item {
-  background: #FBF8F2; border: 1px solid rgba(184, 156, 102, 0.18);
+  background: #EAF6F2; border: 1px solid rgba(12, 216, 160, 0.18);
   border-radius: 10px; padding: 14px; display: flex; flex-direction: column; gap: 4px;
 }
 .wb-item__label { font-size: 11px; color: var(--clr-gray); letter-spacing: 1px; }
@@ -116,7 +116,7 @@ onMounted(loadBrief)
 .wb-ai-actions { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
 .wb-model { font-size: 12px; color: var(--clr-gray); }
 .wb-review {
-  background: #FBF8F2; border: 1px solid rgba(184, 156, 102, 0.22);
+  background: #EAF6F2; border: 1px solid rgba(12, 216, 160, 0.22);
   border-radius: 10px; padding: 16px;
 }
 .wb-review pre {
@@ -125,8 +125,8 @@ onMounted(loadBrief)
   font-family: var(--font-primary);
 }
 .wb-mock {
-  font-size: 12px; color: #8a6d3b; background: rgba(201, 169, 110, 0.1);
-  border: 1px dashed rgba(201, 169, 110, 0.5); border-radius: 8px;
+  font-size: 12px; color: #8a6d3b; background: rgba(12, 216, 160, 0.1);
+  border: 1px dashed rgba(12, 216, 160, 0.5); border-radius: 8px;
   padding: 8px 12px; margin-bottom: 10px;
 }
 

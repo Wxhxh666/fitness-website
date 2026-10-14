@@ -38,7 +38,7 @@ const items = [
 
 <style scoped>
 .p-sidebar { position: sticky; top: 24px; padding: 24px 18px; }
-.p-sidebar__head { padding: 4px 10px 18px; border-bottom: 1px solid rgba(184, 156, 102, 0.2); margin-bottom: 14px; }
+.p-sidebar__head { padding: 4px 10px 18px; border-bottom: 1px solid rgba(12, 216, 160, 0.2); margin-bottom: 14px; }
 .p-sidebar__label { font-size: 10px; letter-spacing: 3px; color: var(--clr-gold); display: block; margin-bottom: 6px; }
 .p-sidebar__title { font-size: 17px; font-weight: 500; color: var(--clr-dark); }
 .p-sidebar__menu { display: flex; flex-direction: column; gap: 4px; }
@@ -58,11 +58,11 @@ const items = [
   transition: all 0.25s ease;
 }
 .p-sidebar__item .el-icon { color: var(--clr-gray-light); transition: color 0.25s ease; }
-.p-sidebar__item:hover { background: rgba(184, 156, 102, 0.08); color: var(--clr-gold-dark); }
+.p-sidebar__item:hover { background: rgba(12, 216, 160, 0.08); color: var(--clr-gold-dark); }
 .p-sidebar__item.is-active {
-  background: linear-gradient(135deg, #C6A878, #B89C66);
+  background: linear-gradient(135deg, #B6FF3C, #0CD8A0);
   color: #FFFFFF;
-  box-shadow: 0 6px 16px rgba(184, 156, 102, 0.28);
+  box-shadow: 0 6px 16px rgba(12, 216, 160, 0.28);
 }
 .p-sidebar__item.is-active .el-icon { color: #FFFFFF; }
 </style>

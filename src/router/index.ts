@@ -1,4 +1,4 @@
-﻿import { createRouter, createWebHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import AdminLayout from '@/views/admin/AdminLayout.vue'
 
 
@@ -10,6 +10,9 @@ const router = createRouter({
     { path: '/plans', name: 'plans', component: () => import('@/views/PlansView.vue') },
     { path: '/plans/:id', name: 'planDetail', component: () => import('@/views/PlanDetailView.vue') },
     { path: '/body-data', name: 'bodyData', component: () => import('@/views/BodyDataView.vue') },
+    { path: '/body-data/trends', name: 'bodyDataTrends', component: () => import('@/views/BodyDataTrends.vue') },
+    { path: '/body-data/diet', name: 'bodyDataDiet', component: () => import('@/views/BodyDataDiet.vue') },
+    { path: '/body-data/records', name: 'bodyDataRecords', component: () => import('@/views/BodyDataRecords.vue') },
     { path: '/contact', name: 'contact', component: () => import('@/views/ContactView.vue') },
     { path: '/login', name: 'login', component: () => import('@/views/LoginView.vue') },
   { path: '/profile', name: 'profile', component: () => import('@/views/ProfileView.vue') },

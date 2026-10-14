@@ -37,7 +37,7 @@ const props = withDefaults(defineProps<{
   showValues?: boolean
   height?: number
 }>(), {
-  color: '#c9a96e',
+  color: '#0CD8A0',
   unit: '',
   showValues: false,
   height: 260,
@@ -117,7 +117,7 @@ function fmt(v: number) {
 .body-chart__svg { width: 100%; display: block; }
 .body-chart__grid { stroke: rgba(0, 0, 0, 0.07); stroke-width: 1; }
 .body-chart__axis { font-size: 11px; fill: var(--clr-gray-light, #9a9a9a); font-family: var(--font-primary); }
-.body-chart__area { fill: rgba(201, 169, 110, 0.12); stroke: none; }
+.body-chart__area { fill: rgba(12, 216, 160, 0.12); stroke: none; }
 .body-chart__line { fill: none; stroke-width: 2; }
 .body-chart__dot { stroke: var(--clr-white, #fff); stroke-width: 2; }
 .body-chart__value { font-size: 11px; fill: var(--clr-dark, #111); font-family: var(--font-primary); }

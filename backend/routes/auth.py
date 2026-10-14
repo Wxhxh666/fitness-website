@@ -1,4 +1,4 @@
-﻿import random
+import random
 import string
 from datetime import datetime, timedelta
 from flask import jsonify, request
@@ -75,26 +75,29 @@ def send_code():
 
 @auth_bp.route("/register", methods=["POST"])
 def register():
-    """注册"""
+    """注册（账号 + 密码，无需验证码）
+
+    说明：应产品要求移除了验证码校验。代价是无法验证邮箱/手机号归属，
+    因此这里补上格式校验与重复注册检查作为基本防线。
+    """
     data = request.get_json(silent=True) or {}
     identifier = (data.get("identifier") or "").strip()
-    code = (data.get("code") or "").strip()
     password = (data.get("password") or "").strip()
 
     if not identifier:
         return jsonify(code=400, msg="请输入手机号或邮箱"), 400
-    if not code:
-        return jsonify(code=400, msg="请输入验证码"), 400
     if not password or len(password) < 6:
         return jsonify(code=400, msg="密码至少6位"), 400
 
-    # 校验验证码
-    vc = VerificationCode.query.filter_by(
-        identifier=identifier, code=code, is_used=False
-    ).order_by(VerificationCode.id.desc()).first()
-
-    if not vc or vc.is_expired():
-        return jsonify(code=400, msg="验证码无效或已过期"), 400
+    # 格式校验：含 @ 视为邮箱，否则视为手机号。
+    # 用“含 @”而不是“@ 和 . 都有”来判类型，否则 "abc@" 这类会落进手机号分支，
+    # 报出“手机号格式不正确”这种误导性提示。
+    if "@" in identifier:
+        if not is_valid_email(identifier):
+            return jsonify(code=400, msg="邮箱格式不正确"), 400
+    else:
+        if not is_valid_phone(identifier):
+            return jsonify(code=400, msg="手机号格式不正确（需11位数字）"), 400
 
     # 检查是否已注册
     if "@" in identifier:
@@ -113,9 +116,6 @@ def register():
         nickname=identifier[:4] + "***",
     )
     db.session.add(user)
-
-    # 标记验证码已使用
-    vc.is_used = True
     db.session.commit()
     token = generate_token(user.id)
 

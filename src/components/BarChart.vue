@@ -25,7 +25,7 @@ const props = withDefaults(defineProps<{
   unit?: string
   height?: number
 }>(), {
-  color: '#c9a96e',
+  color: '#0CD8A0',
   unit: '',
   height: 240,
 })

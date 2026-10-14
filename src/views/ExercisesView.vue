@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="exercises-page">
     <section class="page-hero">
       <div class="page-hero__bg"></div>
@@ -127,7 +127,7 @@ const filteredExercises = computed(() => exercises.value)
 .exercise-card__meta { display:flex; align-items:center; gap:16px; }
 .exercise-card__difficulty { font-size:11px; letter-spacing:1px; padding:4px 12px; border:1px solid; }
 .diff--beginner { color:#6b8e6b; border-color:#6b8e6b; }
-.diff--intermediate { color:#c9a96e; border-color:#c9a96e; }
+.diff--intermediate { color:#0CD8A0; border-color:#0CD8A0; }
 .diff--advanced { color:#c0392b; border-color:#c0392b; }
 .exercise-card__target { font-size:12px; color:var(--clr-gray); display:flex; align-items:center; gap:4px; }.exercise-card__video { font-size:12px; color:var(--clr-gold); display:flex; align-items:center; gap:4px; margin-left:auto; cursor:pointer; }
 .exercise-card__video:hover { color:var(--clr-gold-dark); }

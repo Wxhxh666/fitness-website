@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="profile-page">
     <section class="page-hero">
       <div class="page-hero__bg"></div>
@@ -176,12 +176,12 @@ async function submitField(field: string) {
 .profile-label { width:100px; flex-shrink:0; font-size:14px; color:#666; letter-spacing:1px; padding-top:4px; }
 .profile-value { flex:1; }
 .profile-input { padding:8px 12px; border:1px solid #ddd; font-size:13px; width:240px; outline:none; }
-.profile-input:focus { border-color:#c9a96e; }
-.avatar-circle { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,#c9a96e,#b8954a); display:flex; align-items:center; justify-content:center; font-size:24px; color:#fff; font-weight:500; margin-bottom:12px; }
+.profile-input:focus { border-color:#0CD8A0; }
+.avatar-circle { width:64px; height:64px; border-radius:50%; background:linear-gradient(135deg,#0CD8A0,#0CD8A0); display:flex; align-items:center; justify-content:center; font-size:24px; color:#fff; font-weight:500; margin-bottom:12px; }
 .avatar-input-row { display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-.btn-primary-sm { padding:8px 16px; background:#c9a96e; border:none; color:#fff; font-size:12px; letter-spacing:1px; cursor:pointer; transition:all .2s; }
-.btn-primary-sm:hover { background:#b8954a; }
-.badge-pending { font-size:11px; color:#c9a96e; letter-spacing:1px; padding:4px 8px; border:1px solid #c9a96e; }
+.btn-primary-sm { padding:8px 16px; background:#0CD8A0; border:none; color:#fff; font-size:12px; letter-spacing:1px; cursor:pointer; transition:all .2s; }
+.btn-primary-sm:hover { background:#0CD8A0; }
+.badge-pending { font-size:11px; color:#0CD8A0; letter-spacing:1px; padding:4px 8px; border:1px solid #0CD8A0; }
 .current-value { font-size:12px; color:#999; margin-top:4px; }
 .avatar-url { font-size:12px; color:#999; word-break:break-all; }
 @media (max-width:768px) { .page-hero__title { font-size:32px; } .profile-row { flex-direction:column; gap:8px; } .profile-input { width:100%; } }

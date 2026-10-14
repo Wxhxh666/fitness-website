@@ -52,7 +52,7 @@ const emit = defineEmits<{
 .data-entry { padding: 100px 0; }
 .data-entry__grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; margin-top: 56px; }
 .data-entry__card { background: var(--clr-white); border: 1px solid rgba(0, 0, 0, 0.06); padding: 40px 30px; text-align: center; cursor: pointer; transition: var(--transition-default); }
-.data-entry__card:hover { transform: translateY(-5px); box-shadow: 0 14px 44px rgba(0, 0, 0, 0.08); border-color: rgba(201, 169, 110, 0.4); }
+.data-entry__card:hover { transform: translateY(-5px); box-shadow: 0 14px 44px rgba(0, 0, 0, 0.08); border-color: rgba(12, 216, 160, 0.4); }
 .data-entry__icon { color: var(--clr-gold); margin-bottom: 18px; }
 .data-entry__title { font-family: var(--font-display); font-size: 20px; font-weight: 400; margin-bottom: 12px; color: var(--clr-dark); }
 .data-entry__desc { font-size: 13px; color: var(--clr-gray); line-height: 1.8; margin-bottom: 16px; min-height: 48px; }

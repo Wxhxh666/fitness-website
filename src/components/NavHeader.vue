@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <header :class="['nav-header', { 'nav-header--scrolled': isScrolled, 'nav-header--transparent': !isScrolled && isHome }]">
     <div class="nav-header__inner container">
       <router-link to="/" class="nav-header__logo">
@@ -7,14 +7,40 @@
       </router-link>
 
       <nav class="nav-header__menu">
-        <router-link v-for="item in menuItems" :key="item.path"
-          :to="item.path"
-          class="nav-header__link"
-          :class="{ 'is-active': currentRoute === item.path }"
-        >
-          <span class="nav-header__link-indicator"></span>
-          {{ item.label }}
-        </router-link>
+        <template v-for="item in menuItems" :key="item.path">
+          <div
+            v-if="item.path === '/body-data'"
+            class="nav-header__item"
+            @mouseenter="submenuOpen = true"
+            @mouseleave="submenuOpen = false"
+          >
+            <router-link :to="item.path" class="nav-header__link" :class="{ 'is-active': isBodyDataActive }">
+              <span class="nav-header__link-indicator"></span>
+              {{ item.label }}
+              <el-icon class="nav-header__caret" :class="{ 'is-open': submenuOpen }"><ArrowDown /></el-icon>
+            </router-link>
+            <transition name="submenu-fade">
+              <div v-if="submenuOpen" class="nav-header__submenu">
+                <router-link
+                  v-for="s in bodyDataItems"
+                  :key="s.path"
+                  :to="s.path"
+                  class="nav-header__submenu-item"
+                  :class="{ 'is-active': currentRoute === s.path }"
+                >{{ s.label }}</router-link>
+              </div>
+            </transition>
+          </div>
+          <router-link
+            v-else
+            :to="item.path"
+            class="nav-header__link"
+            :class="{ 'is-active': currentRoute === item.path }"
+          >
+            <span class="nav-header__link-indicator"></span>
+            {{ item.label }}
+          </router-link>
+        </template>
       </nav>
 
       <div class="nav-header__actions">
@@ -47,12 +73,24 @@
 
     <transition name="slide-fade">
       <div v-if="mobileMenuOpen" class="nav-header__mobile" @click.self="mobileMenuOpen = false">
-        <router-link v-for="item in menuItems" :key="item.path"
-          :to="item.path"
-          class="nav-header__mobile-link"
-          :class="{ 'is-active': currentRoute === item.path }"
-          @click="mobileMenuOpen = false"
-        >{{ item.label }}</router-link>
+        <template v-for="item in menuItems" :key="item.path">
+          <router-link
+            :to="item.path"
+            class="nav-header__mobile-link"
+            :class="{ 'is-active': item.path === '/body-data' ? isBodyDataActive : currentRoute === item.path }"
+            @click="mobileMenuOpen = false"
+          >{{ item.label }}</router-link>
+          <div v-if="item.path === '/body-data'" class="nav-header__mobile-sub">
+            <router-link
+              v-for="s in bodyDataItems"
+              :key="s.path"
+              :to="s.path"
+              class="nav-header__mobile-subitem"
+              :class="{ 'is-active': currentRoute === s.path }"
+              @click="mobileMenuOpen = false"
+            >{{ s.label }}</router-link>
+          </div>
+        </template>
         <template v-if="isLoggedIn">
           <span class="nav-header__mobile-link" style="color:var(--clr-gold);border-bottom:none;">
             <el-icon><User /></el-icon> {{ user?.nickname || '用户' }}
@@ -76,6 +114,7 @@ const route = useRoute()
 const isScrolled = ref(false)
 const mobileMenuOpen = ref(false)
 const showDropdown = ref(false)
+const submenuOpen = ref(false)
 const isLoggedIn = ref(checkLogin())
 const user = ref(getUser())
 
@@ -90,6 +129,7 @@ function fullUrl(path?: string) {
 watch(() => route.path, () => {
   isLoggedIn.value = checkLogin()
   user.value = getUser()
+  submenuOpen.value = false
 }, { immediate: false })
 const router = useRouter()
 
@@ -107,6 +147,14 @@ const menuItems = [
   { path: '/body-data', label: '身材数据管理' },
   { path: '/contact', label: '联系' },
 ]
+
+const bodyDataItems = [
+  { path: '/body-data', label: '身体概览' },
+  { path: '/body-data/trends', label: '指标趋势' },
+  { path: '/body-data/diet', label: 'AI 饮食' },
+  { path: '/body-data/records', label: '数据管理' },
+]
+const isBodyDataActive = computed(() => route.path === '/body-data' || route.path.startsWith('/body-data/'))
 
 const currentRoute = computed(() => route.path)
 const isHome = computed(() => route.path === '/')
@@ -135,7 +183,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 }
 .nav-header--scrolled {
   background: rgba(13, 13, 13, 0.98); backdrop-filter: blur(16px);
-  border-bottom: 1px solid rgba(201, 169, 110, 0.15);
+  border-bottom: 1px solid rgba(12, 216, 160, 0.15);
 }
 .nav-header__inner { display: flex; align-items: center; justify-content: space-between; height: 72px; }
 
@@ -167,6 +215,43 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 .nav-header__link.is-active { color: var(--clr-gold); }
 .nav-header__link.is-active .nav-header__link-indicator { background: var(--clr-gold); }
 
+/* ---------- 身材数据管理 下拉子菜单 ---------- */
+.nav-header__item { position: relative; }
+.nav-header__caret { width: 13px; height: 13px; transition: transform var(--transition-default); }
+.nav-header__caret.is-open { transform: rotate(180deg); }
+.nav-header__submenu {
+  position: absolute; top: calc(100% + 14px); left: 50%; transform: translateX(-50%);
+  min-width: 180px; padding: 8px;
+  background: rgba(13, 20, 27, 0.98); backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(12, 216, 160, 0.22); border-radius: 12px;
+  box-shadow: 0 22px 54px rgba(0, 0, 0, 0.5); z-index: 1001;
+}
+.nav-header__submenu::before {
+  content: ""; position: absolute; top: -16px; left: 0; right: 0; height: 16px;
+}
+.nav-header__submenu-item {
+  display: block; padding: 10px 14px; font-size: 13px; letter-spacing: 1px;
+  color: var(--clr-gray-lighter); text-decoration: none; border-radius: 8px; white-space: nowrap;
+  transition: var(--transition-default);
+}
+.nav-header__submenu-item:hover { color: var(--clr-gold); background: rgba(12, 216, 160, 0.08); }
+.nav-header__submenu-item.is-active { color: var(--clr-gold); background: rgba(12, 216, 160, 0.14); }
+
+.submenu-fade-enter-active,
+.submenu-fade-leave-active { transition: all 0.22s ease; }
+.submenu-fade-enter-from,
+.submenu-fade-leave-to { opacity: 0; transform: translateX(-50%) translateY(-8px); }
+
+/* 移动端子菜单 */
+.nav-header__mobile-sub { padding-left: 14px; }
+.nav-header__mobile-subitem {
+  display: block; padding: 10px 0 10px 12px; font-size: 13px; letter-spacing: 1px;
+  color: var(--clr-gray); text-decoration: none; border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+  transition: var(--transition-default);
+}
+.nav-header__mobile-subitem:hover,
+.nav-header__mobile-subitem.is-active { color: var(--clr-gold); }
+
 /* Login button */
 .nav-header__actions { display: flex; align-items: center; }
 .nav-header__login-btn {
@@ -195,7 +280,7 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
   position: fixed; top: 72px; left: 0; width: 100%;
   background: rgba(13, 13, 13, 0.98); backdrop-filter: blur(16px);
   padding: 20px 24px; display: flex; flex-direction: column; gap: 4px;
-  border-bottom: 1px solid rgba(201, 169, 110, 0.15);
+  border-bottom: 1px solid rgba(12, 216, 160, 0.15);
 }
 .nav-header__mobile-link {
   padding: 14px 0; font-size: 14px; letter-spacing: 1.5px;
@@ -213,11 +298,11 @@ onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 .slide-fade-leave-to { opacity: 0; transform: translateY(-10px); }
 
 .nav-header__avatar-wrap { position:relative; }
-.nav-header__avatar { width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#c9a96e,#b8954a);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:500;cursor:pointer;overflow:hidden; }
+.nav-header__avatar { width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#0CD8A0,#0CD8A0);display:flex;align-items:center;justify-content:center;color:#fff;font-size:15px;font-weight:500;cursor:pointer;overflow:hidden; }
 .nav-header__avatar-img { width:100%;height:100%;object-fit:cover; }
 .nav-header__dropdown { position:absolute;top:calc(100% + 8px);right:0;background:#1a1a1a;border:1px solid rgba(255,255,255,0.08);min-width:140px;z-index:100; }
 .nav-header__dropdown-item { display:block;padding:10px 18px;font-size:13px;color:#ccc;text-decoration:none;background:none;border:none;width:100%;text-align:left;cursor:pointer;font-family:inherit;transition:all .2s;letter-spacing:.5px; }
-.nav-header__dropdown-item:hover { color:#c9a96e;background:rgba(255,255,255,0.03); }
+.nav-header__dropdown-item:hover { color:#0CD8A0;background:rgba(255,255,255,0.03); }
 .nav-header__dropdown-divider { height:1px;background:rgba(255,255,255,0.06);margin:4px 0; }
 .nav-header__dropdown-logout { color:#999; }
 .nav-header__dropdown-logout:hover { color:#c0392b!important; }

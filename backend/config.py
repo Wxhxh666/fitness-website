@@ -25,7 +25,14 @@ class Config:
     SQLALCHEMY_ECHO = False
 
     # CORS
-    CORS_ORIGINS = os.environ.get("CORS_ORIGINS", "http://localhost:3000,http://localhost:4173")
+    # 注意：localhost 与 127.0.0.1 在浏览器看来是“不同的源”，必须都放行，
+    # 否则从 127.0.0.1:4173 打开的页面会因为缺少 CORS 响应头而拿不到任何数据
+    # （接口本身返回 200，但响应会被浏览器丢弃，表现为“页面数据加载不出来”）。
+    CORS_ORIGINS = os.environ.get(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://localhost:4173,"
+        "http://127.0.0.1:3000,http://127.0.0.1:4173",
+    )
 
     # JSON
     JSON_AS_ASCII = False

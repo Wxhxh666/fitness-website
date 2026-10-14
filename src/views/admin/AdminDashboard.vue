@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="admin-dashboard">
     <div v-if="loading" style="text-align:center;padding:80px;color:#999;">加载中...</div>
     <template v-else>
@@ -64,5 +64,5 @@ onMounted(async () => {
   padding: 10px 20px; border: 1px solid #e0e0e0; text-decoration: none;
   font-size: 13px; color: #666; transition: all 0.2s;
 }
-.quick-link:hover { border-color: #c9a96e; color: #c9a96e; }
+.quick-link:hover { border-color: #0CD8A0; color: #0CD8A0; }
 </style>

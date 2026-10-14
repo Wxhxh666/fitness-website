@@ -45,7 +45,22 @@ DEEPSEEK_API_KEY=你的DeepSeek Key（可选，AI饮食方案需要）
 
 前端后端地址可通过 `VITE_API_BASE` 覆盖（默认 `http://127.0.0.1:8000/api`），复制 `src/.env.example` 为 `src/.env` 使用。
 
+> CORS：后端默认放行 `localhost` 和 `127.0.0.1` 的 3000 / 4173 端口。
+> 这两者在浏览器看来是**不同的源**，换域名或换端口访问时需同步更新 `CORS_ORIGINS`，
+> 否则接口会返回 200 但响应被浏览器丢弃，表现为"页面数据加载不出来"。
+
 ## 启动
+
+一键启动（推荐，在项目根目录执行，前后端一起起、Ctrl+C 一起停）：
+
+```bash
+start-dev.cmd              # 前端预览（4173）+ 后端（8000）
+start-dev.cmd -Mode dev    # 前端开发模式（热更新，3000）+ 后端  ★改前端时用这个
+```
+
+> 启动时会自动检查前后端跨域是否放行，并提示 `dist` 构建产物是否过期。
+
+手动分别启动（备用）：
 
 后端（端口 8000）：
 
@@ -59,10 +74,12 @@ python app.py
 
 ```bash
 cd fitness-website
-npx vite preview      # 预览构建产物；开发用 npx vite
+npx vite preview      # 预览 dist 构建产物（改了源码必须先 npx vite build）
+npx vite              # 开发模式，直接读源码 + 热更新
 ```
 
-> 注意：Windows PowerShell 默认禁止执行 `.ps1` 脚本，若 `npx`/`npm` 报错请改用 `npx.cmd` / `npm.cmd`。
+> 注意：`vite preview` 服务的是 `dist/` 构建产物而非源码，改了代码不重新 build 就会一直看到旧界面。
+> Windows PowerShell 默认禁止执行 `.ps1` 脚本，若 `npx`/`npm` 报错请改用 `npx.cmd` / `npm.cmd`。
 
 ## 管理员账号
 

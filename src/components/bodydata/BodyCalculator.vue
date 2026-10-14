@@ -292,7 +292,7 @@ async function confirmSaveRecord() {
 .panel-card__head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 20px; flex-wrap: wrap; }
 .panel-card__title { font-size: 16px; font-weight: 500; display: flex; align-items: center; gap: 8px; }
 .panel-card__title .el-icon { color: var(--clr-gold); }
-.panel-card__tag { font-size: 11px; color: var(--clr-gold-dark); border: 1px solid rgba(201, 169, 110, 0.4); padding: 2px 8px; letter-spacing: 1px; }
+.panel-card__tag { font-size: 11px; color: var(--clr-gold-dark); border: 1px solid rgba(12, 216, 160, 0.4); padding: 2px 8px; letter-spacing: 1px; }
 
 .calc__form { background: var(--clr-bg-section); border: 1px solid rgba(0, 0, 0, 0.05); padding: 24px; margin-bottom: 20px; }
 .calc__form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
@@ -308,18 +308,18 @@ async function confirmSaveRecord() {
 .metric-detail-card { background: var(--clr-white); border: 1px solid rgba(0, 0, 0, 0.05); padding: 16px; }
 .metric-detail-card__head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
 .metric-detail-card__label { font-size: 12px; letter-spacing: 1px; color: var(--clr-gray); }
-.metric-detail-card__tag { font-size: 10px; color: var(--clr-gold-dark); border: 1px solid rgba(201, 169, 110, 0.4); padding: 1px 6px; letter-spacing: 0.5px; }
+.metric-detail-card__tag { font-size: 10px; color: var(--clr-gold-dark); border: 1px solid rgba(12, 216, 160, 0.4); padding: 1px 6px; letter-spacing: 0.5px; }
 .metric-detail-card__value { display: flex; align-items: baseline; gap: 4px; margin-bottom: 2px; }
 .metric-detail-card__num { font-family: var(--font-display); font-size: 26px; color: var(--clr-dark); }
 .metric-detail-card__unit { font-size: 12px; color: var(--clr-gray); }
 .metric-detail-card__category { font-size: 11px; margin-bottom: 12px; }
 .cat-normal { color: #6b8e6b; }
-.cat-underweight { color: #c9a96e; }
-.cat-overweight { color: #c9a96e; }
+.cat-underweight { color: #0CD8A0; }
+.cat-overweight { color: #0CD8A0; }
 .cat-obese { color: #c0392b; }
 .cat-unknown { color: var(--clr-gray); }
 .metric-detail-card__bar { margin-top: 4px; }
-.metric-detail-card__track { position: relative; height: 6px; background: linear-gradient(to right, #c9a96e 0%, #6b8e6b 30%, #6b8e6b 55%, #c9a96e 75%, #c0392b 100%); border-radius: 3px; }
+.metric-detail-card__track { position: relative; height: 6px; background: linear-gradient(to right, #0CD8A0 0%, #6b8e6b 30%, #6b8e6b 55%, #0CD8A0 75%, #c0392b 100%); border-radius: 3px; }
 .metric-detail-card__healthy { position: absolute; top: -2px; height: 10px; border: 1px dashed rgba(17, 17, 17, 0.45); border-radius: 3px; background: rgba(255, 255, 255, 0.25); }
 .metric-detail-card__dot { position: absolute; top: -4px; width: 14px; height: 14px; border-radius: 50%; background: var(--clr-dark); border: 2px solid var(--clr-white); transform: translateX(-7px); z-index: 2; box-shadow: 0 1px 5px rgba(0, 0, 0, 0.3); }
 .metric-detail-card__scale { display: flex; justify-content: space-between; margin-top: 8px; font-size: 10px; color: var(--clr-gray-light); }
@@ -331,7 +331,7 @@ async function confirmSaveRecord() {
 .health-tips__item { display: flex; align-items: flex-start; gap: 10px; font-size: 12px; line-height: 1.6; color: var(--clr-gray-deep); }
 .health-tips__dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 7px; flex-shrink: 0; }
 .health-tips__item--info .health-tips__dot { background: #6b8e6b; }
-.health-tips__item--warn .health-tips__dot { background: #c9a96e; }
+.health-tips__item--warn .health-tips__dot { background: #0CD8A0; }
 .health-tips__item--danger .health-tips__dot { background: #c0392b; }
 .health-tips__note { margin-top: 12px; font-size: 11px; color: var(--clr-gray-light); }
 

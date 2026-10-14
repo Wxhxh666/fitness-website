@@ -118,7 +118,7 @@ onBeforeUnmount(destroyCropper)
   width: 100%;
   height: 300px;
   overflow: hidden;
-  background: #F3EDDF;
+  background: #EAF6F2;
   border-radius: 10px;
 }
 .avatar-crop__img { display: block; max-width: 100%; }

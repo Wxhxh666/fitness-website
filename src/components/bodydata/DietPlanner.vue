@@ -537,7 +537,7 @@ onMounted(() => {
 .ai-diet__field { margin-bottom: 16px; }
 .ai-diet__field label { display: block; font-size: 12px; color: var(--clr-gray); letter-spacing: 1px; margin-bottom: 6px; }
 .ai-diet__actions { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
-.ai-diet__mock { background: rgba(201, 169, 110, 0.08); border: 1px dashed rgba(201, 169, 110, 0.5); color: #8a6d3b; font-size: 12px; padding: 10px 14px; margin-bottom: 16px; line-height: 1.7; }
+.ai-diet__mock { background: rgba(12, 216, 160, 0.08); border: 1px dashed rgba(12, 216, 160, 0.5); color: #8a6d3b; font-size: 12px; padding: 10px 14px; margin-bottom: 16px; line-height: 1.7; }
 .ai-diet__hint { margin-top: 14px; font-size: 12px; color: var(--clr-gray-light); line-height: 1.7; }
 .btn-text { background: none; border: none; color: var(--clr-gray); font-size: 13px; letter-spacing: 1px; cursor: pointer; padding: 8px 4px; transition: var(--transition-default); }
 .btn-text:hover { color: var(--clr-gold-dark); }
@@ -569,8 +569,8 @@ onMounted(() => {
 .chat-dot:nth-child(3) { animation-delay: 0.4s; }
 @keyframes chatPulse { 0%, 100% { opacity: 0.3; transform: scale(0.85); } 50% { opacity: 1; transform: scale(1); } }
 .chat-panel__chips { display: flex; gap: 8px; flex-wrap: wrap; padding: 12px 14px; border-top: 1px solid rgba(0, 0, 0, 0.05); }
-.chat-chip { font-size: 12px; color: var(--clr-gold-dark); background: rgba(201, 169, 110, 0.08); border: 1px solid rgba(201, 169, 110, 0.35); padding: 6px 12px; cursor: pointer; transition: var(--transition-default); }
-.chat-chip:hover { background: rgba(201, 169, 110, 0.18); }
+.chat-chip { font-size: 12px; color: var(--clr-gold-dark); background: rgba(12, 216, 160, 0.08); border: 1px solid rgba(12, 216, 160, 0.35); padding: 6px 12px; cursor: pointer; transition: var(--transition-default); }
+.chat-chip:hover { background: rgba(12, 216, 160, 0.18); }
 .chat-chip:disabled { opacity: 0.5; cursor: not-allowed; }
 .chat-panel__input { display: flex; gap: 10px; padding: 12px 14px; border-top: 1px solid rgba(0, 0, 0, 0.05); align-items: flex-end; }
 .chat-panel__input .el-textarea { flex: 1; }

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="admin-layout">
     <!-- Sidebar -->
     <aside class="admin-sidebar">
@@ -92,7 +92,7 @@ function logout() {
 }
 .admin-sidebar__logo {
   font-family: "Playfair Display", serif; font-size: 24px; font-weight: 600;
-  color: #c9a96e; font-style: italic;
+  color: #0CD8A0; font-style: italic;
 }
 .admin-sidebar__title { font-size: 14px; color: #f5f0e8; letter-spacing: 1px; }
 .admin-sidebar__nav { flex: 1; padding: 12px 0; display: flex; flex-direction: column; gap: 2px; }
@@ -101,8 +101,8 @@ function logout() {
   font-size: 13px; color: #aaa; text-decoration: none; transition: all 0.2s;
   letter-spacing: 0.5px;
 }
-.admin-sidebar__link:hover { color: #c9a96e; background: rgba(255,255,255,0.03); }
-.admin-sidebar__link.is-active { color: #c9a96e; background: rgba(201,169,110,0.08); }
+.admin-sidebar__link:hover { color: #0CD8A0; background: rgba(255,255,255,0.03); }
+.admin-sidebar__link.is-active { color: #0CD8A0; background: rgba(201,169,110,0.08); }
 .admin-sidebar__footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 8px 0; }
 .admin-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
 .admin-header {
@@ -116,7 +116,7 @@ function logout() {
   padding: 6px 14px; background: none; border: 1px solid #ddd;
   font-size: 12px; cursor: pointer; color: #666; transition: all 0.2s;
 }
-.admin-header__logout:hover { border-color: #c9a96e; color: #c9a96e; }
+.admin-header__logout:hover { border-color: #0CD8A0; color: #0CD8A0; }
 .admin-content { padding: 24px 32px; flex: 1; }
 </style>
 

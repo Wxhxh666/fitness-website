@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="admin-page">
     <div class="admin-page__toolbar">
       <el-radio-group v-model="statusFilter" @change="load">
@@ -9,14 +9,14 @@
     </div>
     <el-table :data="items" stripe v-loading="loading" @row-click="showDetail" style="cursor:pointer;">
       <el-table-column prop="id" label="ID" width="60" />
-      <el-table-column label="用户" width="180">
+      <el-table-column label="用户" min-width="130" show-overflow-tooltip>
         <template #default="{ row }">{{ row.user_nickname || row.user_email }}</template>
       </el-table-column>
       <el-table-column prop="field_name" label="字段" width="100" />
-      <el-table-column label="旧值" width="150">
+      <el-table-column label="旧值" min-width="140" show-overflow-tooltip>
         <template #default="{ row }">{{ row.old_value || "-" }}</template>
       </el-table-column>
-      <el-table-column label="申请值" width="150">
+      <el-table-column label="申请值" min-width="240" show-overflow-tooltip>
         <template #default="{ row }">{{ row.new_value }}</template>
       </el-table-column>
       <el-table-column label="状态" width="100" align="center">

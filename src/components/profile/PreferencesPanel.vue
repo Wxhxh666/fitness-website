@@ -79,7 +79,7 @@ onMounted(loadPrefs)
   display: flex;
   gap: 28px;
   padding: 22px 0;
-  border-bottom: 1px solid rgba(184, 156, 102, 0.14);
+  border-bottom: 1px solid rgba(12, 216, 160, 0.14);
 }
 .pf-label { width: 130px; flex-shrink: 0; font-size: 14px; color: var(--clr-gray); padding-top: 8px; letter-spacing: 1px; }
 .pf-value { flex: 1; }

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="plan-detail-page">
     <section class="page-hero" v-if="plan">
       <div class="page-hero__bg"></div>
@@ -82,7 +82,7 @@ onMounted(async () => {
 .plan-detail__meta { display:flex; gap:16px; align-items:center; margin-bottom:16px; flex-wrap:wrap; }
 .plan-detail__badge { font-size:10px; letter-spacing:2px; padding:4px 14px; color:var(--clr-gold); border:1px solid var(--clr-gold); }
 .plan-detail__info { font-size:13px; color:var(--clr-gray-light); letter-spacing:1px; }
-.plan-detail__diff.diff--beginner { color:#6b8e6b; } .plan-detail__diff.diff--intermediate { color:#c9a96e; } .plan-detail__diff.diff--advanced { color:#c0392b; }
+.plan-detail__diff.diff--beginner { color:#6b8e6b; } .plan-detail__diff.diff--intermediate { color:#0CD8A0; } .plan-detail__diff.diff--advanced { color:#c0392b; }
 .plan-detail__desc { font-size:15px; color:var(--clr-gray-light); line-height:1.8; max-width:600px; }
 .plan-detail__tags { display:flex; gap:8px; margin-top:16px; flex-wrap:wrap; }
 .plan-detail__tag { font-size:11px; letter-spacing:1px; padding:4px 12px; background:rgba(255,255,255,0.05); color:var(--clr-gray); }

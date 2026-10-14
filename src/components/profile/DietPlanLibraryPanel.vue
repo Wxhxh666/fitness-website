@@ -101,7 +101,7 @@ onMounted(loadPlans)
 .dpl-list { display: flex; flex-direction: column; gap: 12px; }
 .dpl-item {
   display: flex; align-items: center; justify-content: space-between; gap: 16px;
-  background: #FBF8F2; border: 1px solid rgba(184, 156, 102, 0.18);
+  background: #EAF6F2; border: 1px solid rgba(12, 216, 160, 0.18);
   border-radius: 10px; padding: 14px 18px;
 }
 .dpl-info { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; font-size: 13px; }
