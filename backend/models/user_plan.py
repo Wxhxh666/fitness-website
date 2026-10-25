@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from . import db, BaseModel, datetime
+from . import db, BaseModel
 
 
 class UserPlan(db.Model, BaseModel):
@@ -25,19 +25,6 @@ class UserPlan(db.Model, BaseModel):
         return d
 
 
-class TrainingLog(db.Model, BaseModel):
-    __tablename__ = "training_logs"
-
-    user_id = db.Column(db.Integer, nullable=False, comment="用户 ID")
-    plan_id = db.Column(db.Integer, nullable=False, comment="计划 ID")
-    is_official = db.Column(db.Boolean, default=False, comment="是否官方计划")
-    log_date = db.Column(db.Date, nullable=False, comment="训练日期")
-    focus = db.Column(db.String(32), comment="训练重点")
-    exercises = db.Column(db.JSON, comment="完成动作列表")
-    note = db.Column(db.Text, comment="备注")
-
-    def to_dict(self, exclude=None):
-        d = super().to_dict(exclude)
-        if isinstance(d.get("log_date"), datetime):
-            d["log_date"] = d["log_date"].strftime("%Y-%m-%d")
-        return d
+# 说明：原来的 TrainingLog（一天一条 + JSON 动作列表）已由
+# models/workout.py 的 WorkoutSession / WorkoutSet 取代，
+# 数据迁移见 migrations/versions/*_migrate_training_logs_to_workout_sessions.py。

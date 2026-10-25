@@ -2,7 +2,9 @@ from flask import jsonify, request
 from models import db
 from models.plan import Plan
 from models.exercise import ExerciseCategory
-from models.user_plan import UserPlan, TrainingLog
+from models.user_plan import UserPlan
+from models.workout import WorkoutSession
+from services import workout as workout_svc
 from utils.auth import require_auth
 from datetime import date
 
@@ -93,38 +95,52 @@ def clone_plan(user, official_plan_id):
 
 
 # ---------- Training Logs ----------
+# 说明：旧实现写 training_logs（一天一条、动作用 JSON 存），已于
+# 2026-10 迁移到 workout_sessions / workout_sets（细化到组）。
+# 这里保留原有 URL 作为「一键打卡」的轻量入口，内部写新的会话表，
+# 详细到组的录入走 /api/workouts/*。
+
+TRAINING_LOG_PLACEHOLDER = "（由训练打卡创建，可在运动记录中补充组数）"
+
 
 @user_plans_bp.route("/training/log", methods=["POST"])
 @require_auth
 def log_training(user):
     data = request.get_json(silent=True) or {}
     log_date_str = data.get("log_date") or date.today().isoformat()
-    try:
-        log_date = date.fromisoformat(log_date_str)
-    except:
-        log_date = date.today()
+    log_date = _parse_date(log_date_str)
 
-    plan_id = data.get("plan_id", 0)
-    is_official = data.get("is_official", False)
+    plan_id = data.get("plan_id") or None
+    focus = (data.get("focus") or "").strip()[:32]
+    note = (data.get("note") or "").strip()
 
-    existing = TrainingLog.query.filter_by(user_id=user.id, log_date=log_date).first()
+    existing = WorkoutSession.query.filter_by(
+        user_id=user.id, session_date=log_date, plan_id=plan_id,
+    ).first()
     if existing:
-        existing.plan_id = plan_id
-        existing.is_official = is_official
-        existing.focus = data.get("focus", existing.focus)
-        existing.exercises = data.get("exercises", existing.exercises)
-        existing.note = data.get("note", existing.note)
+        existing.focus = focus or existing.focus
+        if note:
+            existing.note = note
     else:
-        log = TrainingLog(
-            user_id=user.id, plan_id=plan_id,
-            is_official=is_official, log_date=log_date,
-            focus=data.get("focus", ""),
-            exercises=data.get("exercises", []),
-            note=(data.get("note") or "").strip(),
-        )
-        db.session.add(log)
+        title = focus or "训练打卡"
+        db.session.add(WorkoutSession(
+            user_id=user.id,
+            session_date=log_date,
+            title=title[:64],
+            focus=focus,
+            plan_id=plan_id,
+            note=note,
+            total_sets=0, total_reps=0, total_volume=0.0,
+        ))
     db.session.commit()
     return jsonify(code=0, msg="训练已记录")
+
+
+def _parse_date(value):
+    try:
+        return date.fromisoformat(str(value)[:10])
+    except (ValueError, TypeError):
+        return date.today()
 
 
 @user_plans_bp.route("/training/logs", methods=["GET"])
@@ -134,14 +150,19 @@ def get_training_logs(user):
     plan_id = request.args.get("plan_id", type=int)
     from datetime import timedelta
     since = date.today() - timedelta(days=days)
-    q = TrainingLog.query.filter(
-        TrainingLog.user_id == user.id,
-        TrainingLog.log_date >= since,
-    ).order_by(TrainingLog.log_date.desc())
+    q = WorkoutSession.query.filter(
+        WorkoutSession.user_id == user.id,
+        WorkoutSession.session_date >= since,
+    ).order_by(WorkoutSession.session_date.desc())
     if plan_id:
         q = q.filter_by(plan_id=plan_id)
-    items = q.all()
-    return jsonify(code=0, msg="success", data=[t.to_dict() for t in items])
+    # 保持旧字段名 log_date，避免老前端读不到
+    items = []
+    for s in q.all():
+        d = s.to_dict()
+        d["log_date"] = d.pop("session_date", None)
+        items.append(d)
+    return jsonify(code=0, msg="success", data=items)
 
 
 @user_plans_bp.route("/training/stats", methods=["GET"])
@@ -152,38 +173,25 @@ def get_training_stats(user):
     week_start = today - timedelta(days=today.weekday())
     month_start = today.replace(day=1)
 
-    week_count = TrainingLog.query.filter(
-        TrainingLog.user_id == user.id,
-        TrainingLog.log_date >= week_start,
+    week_count = WorkoutSession.query.filter(
+        WorkoutSession.user_id == user.id,
+        WorkoutSession.session_date >= week_start,
     ).count()
 
-    month_count = TrainingLog.query.filter(
-        TrainingLog.user_id == user.id,
-        TrainingLog.log_date >= month_start,
+    month_count = WorkoutSession.query.filter(
+        WorkoutSession.user_id == user.id,
+        WorkoutSession.session_date >= month_start,
     ).count()
 
-    total_count = TrainingLog.query.filter_by(user_id=user.id).count()
+    total_count = WorkoutSession.query.filter_by(user_id=user.id).count()
 
-    latest = TrainingLog.query.filter_by(user_id=user.id).order_by(TrainingLog.log_date.desc()).first()
+    latest = (WorkoutSession.query.filter_by(user_id=user.id)
+              .order_by(WorkoutSession.session_date.desc()).first())
 
     return jsonify(code=0, msg="success", data={
         "week_count": week_count,
         "month_count": month_count,
         "total_count": total_count,
-        "latest_log_date": latest.log_date.isoformat() if latest else None,
-        "current_streak": _calc_streak(user.id, today),
+        "latest_log_date": latest.session_date.isoformat() if latest else None,
+        "current_streak": workout_svc.current_streak(user.id, today),
     })
-
-
-def _calc_streak(user_id, today):
-    from datetime import timedelta
-    streak = 0
-    d = today
-    while True:
-        log = TrainingLog.query.filter_by(user_id=user_id, log_date=d).first()
-        if log:
-            streak += 1
-            d -= timedelta(days=1)
-        else:
-            break
-    return streak

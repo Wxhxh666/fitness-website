@@ -144,6 +144,7 @@ const menuItems = [
   { path: '/', label: '首页' },
   { path: '/exercises', label: '动作教学' },
   { path: '/plans', label: '计划制定' },
+  { path: '/workouts', label: '运动记录' },
   { path: '/body-data', label: '身材数据管理' },
   { path: '/contact', label: '联系' },
 ]
