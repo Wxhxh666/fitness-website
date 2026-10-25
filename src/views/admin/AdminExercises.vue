@@ -7,7 +7,7 @@
         <el-icon><Plus /></el-icon> 新增动作
       </el-button>
     </div>
-    <el-table :data="exercises" stripe style="width:100%" v-loading="loading">
+    <el-table :data="exercises" flexible stripe style="width:100%" v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column prop="name" label="动作名称" width="140" />
       <el-table-column prop="category_label" label="部位" width="70" />

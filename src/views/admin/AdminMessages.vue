@@ -3,7 +3,7 @@
     <div class="admin-page__toolbar">
       <span class="admin-page__count">共{{ total }} 条记录</span>
     </div>
-    <el-table :data="messages" stripe style="width:100%" v-loading="loading">
+    <el-table :data="messages" flexible stripe style="width:100%" v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column prop="name" label="姓名" width="100" />
       <el-table-column prop="email" label="邮箱" width="180" />

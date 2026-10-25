@@ -3,7 +3,7 @@
     <div class="admin-page__toolbar">
       <span class="admin-page__count">共 {{ total }} 位用户</span>
     </div>
-    <el-table :data="users" stripe style="width:100%" v-loading="loading">
+    <el-table :data="users" flexible stripe style="width:100%" v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column prop="nickname" label="昵称" min-width="120" show-overflow-tooltip />
       <el-table-column prop="email" label="邮箱" min-width="180" show-overflow-tooltip />

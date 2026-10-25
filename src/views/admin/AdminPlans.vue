@@ -9,7 +9,7 @@
       </el-button>
     </div>
 
-    <el-table :data="plans" stripe style="width:100%" v-loading="loading">
+    <el-table :data="plans" flexible stripe style="width:100%" v-loading="loading">
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column prop="name" label="计划名称" width="160" />
       <el-table-column prop="badge" label="标签" width="80" />

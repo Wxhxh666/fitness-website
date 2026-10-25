@@ -7,7 +7,7 @@
         <el-radio-button value="rejected">已拒绝</el-radio-button>
       </el-radio-group>
     </div>
-    <el-table :data="items" stripe v-loading="loading" @row-click="showDetail" style="cursor:pointer;">
+    <el-table :data="items" flexible stripe v-loading="loading" @row-click="showDetail" style="cursor:pointer;">
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column label="用户" min-width="130" show-overflow-tooltip>
         <template #default="{ row }">{{ row.user_nickname || row.user_email }}</template>

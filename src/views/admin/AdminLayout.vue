@@ -105,7 +105,7 @@ function logout() {
 .admin-sidebar__link:hover { color: #0CD8A0; background: rgba(255,255,255,0.03); }
 .admin-sidebar__link.is-active { color: #0CD8A0; background: rgba(201,169,110,0.08); }
 .admin-sidebar__footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 8px 0; }
-.admin-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; }
+.admin-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-width: 0; }
 .admin-header {
   display: flex; align-items: center; justify-content: space-between;
   padding: 16px 32px; background: #fff; border-bottom: 1px solid #eee;
@@ -118,6 +118,6 @@ function logout() {
   font-size: 12px; cursor: pointer; color: #666; transition: all 0.2s;
 }
 .admin-header__logout:hover { border-color: #0CD8A0; color: #0CD8A0; }
-.admin-content { padding: 24px 32px; flex: 1; }
+.admin-content { padding: 24px 32px; flex: 1; min-width: 0; }
 </style>
 
