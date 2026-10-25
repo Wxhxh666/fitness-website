@@ -1,4 +1,4 @@
-﻿from . import db, BaseModel, datetime
+﻿from . import db, BaseModel, utcnow
 
 
 class User(db.Model, BaseModel):
@@ -12,9 +12,9 @@ class User(db.Model, BaseModel):
     ai_model = db.Column(db.String(32), default="deepseek-flash", comment="默认AI模型")
     unit_system = db.Column(db.String(16), default="metric", comment="度量单位")
     notification_enabled = db.Column(db.Boolean, default=True, comment="通知开关")
-    is_active = db.Column(db.Boolean, default=True)
+    is_active = db.Column(db.Boolean, default=True, comment="是否启用")
     is_admin = db.Column(db.Boolean, default=False, comment="是否管理员")
-    last_login_at = db.Column(db.DateTime, nullable=True)
+    last_login_at = db.Column(db.DateTime, nullable=True, comment="最后登录时间")
 
     def to_dict(self, exclude=None):
         exclude = exclude or ["password_hash"]
@@ -24,11 +24,11 @@ class User(db.Model, BaseModel):
 class VerificationCode(db.Model, BaseModel):
     __tablename__ = "verification_codes"
 
-    identifier = db.Column(db.String(100), nullable=False, comment="是否管理员")
-    code = db.Column(db.String(6), nullable=False, comment="是否管理员")
-    purpose = db.Column(db.String(16), default="login", comment="是否管理员")
-    is_used = db.Column(db.Boolean, default=False)
-    expires_at = db.Column(db.DateTime, nullable=False, comment="是否管理员")
+    identifier = db.Column(db.String(100), nullable=False, comment="手机号或邮箱")
+    code = db.Column(db.String(6), nullable=False, comment="验证码")
+    purpose = db.Column(db.String(16), default="login", comment="用途: login/register")
+    is_used = db.Column(db.Boolean, default=False, comment="是否已使用")
+    expires_at = db.Column(db.DateTime, nullable=False, comment="过期时间(UTC)")
 
     def is_expired(self):
-        return datetime.utcnow() > self.expires_at
+        return utcnow() > self.expires_at

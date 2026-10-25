@@ -228,6 +228,8 @@ import {
   generateWeeklyReview,
 } from '@/api'
 import { fmtNum } from '@/utils/units'
+import { ensureLogin } from '@/utils/authGuard'
+import { isLoggedIn } from '@/api'
 
 const props = defineProps<{
   records: any[]
@@ -338,6 +340,7 @@ async function sendChat(text?: string) {
     ElMessage.warning('请先在上方填写身高体重并计算，或保存一条身材记录')
     return
   }
+  if (!ensureLogin('登录后才能使用 AI 营养师（方案会保存到你的账号）')) return
   chatInput.value = ''
   chatMessages.value.push({ role: 'user', content: msg, time: chatNow() })
   chatSending.value = true
@@ -375,6 +378,7 @@ function clearChat() {
 
 async function saveChatPlan(m: any) {
   if (!m.plan) return
+  if (!ensureLogin('请先登录后再保存方案')) return
   try {
     await saveDietPlanReq({
       target: dietForm.target,
@@ -393,6 +397,7 @@ async function saveChatPlan(m: any) {
 }
 
 async function loadDietPlans() {
+  if (!isLoggedIn()) { savedPlans.value = []; return }
   try {
     const res = await getDietPlans()
     savedPlans.value = res.data.items
@@ -429,6 +434,7 @@ const caloriesDiff = computed(() => {
 })
 
 async function loadDietLogs() {
+  if (!isLoggedIn()) { dietLogs.value = []; return }
   try {
     const res = await getDietLogs()
     dietLogs.value = res.data.items
@@ -442,6 +448,7 @@ async function saveDietLogNow() {
     ElMessage.warning('请填写当日摄入热量')
     return
   }
+  if (!ensureLogin('请先登录后再打卡')) return
   try {
     await saveDietLog({
       log_date: dietLogForm.date,
@@ -487,6 +494,7 @@ const reviewChips = computed(() => {
 })
 
 async function generateReview() {
+  if (!ensureLogin('请先登录后再生成周复盘')) return
   reviewLoading.value = true
   try {
     const res = await generateWeeklyReview()

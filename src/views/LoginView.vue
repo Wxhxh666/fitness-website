@@ -116,11 +116,12 @@
 
 <script setup lang="ts">
 import { ref, reactive, computed } from 'vue'
-import { useRouter } from 'vue-router'
+import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { loginWithPassword, registerWithPassword, setToken, setUser, getUser } from '@/api'
 
 const router = useRouter()
+const route = useRoute()
 const submitting = ref(false)
 const showPassword = ref(false)
 const mode = ref<'login' | 'register'>('login')
@@ -203,7 +204,7 @@ function applyServerError(msg: string) {
   ElMessage.error(msg)
 }
 
-/** 登录成功后的统一收尾：落库用户信息 + 按角色跳转 */
+/** 登录成功后的统一收尾：落库用户信息 + 按角色与来源页跳转 */
 function finishAuth(data: any, successMsg: string) {
   setToken(data.token)
   const identifier = form.identifier.trim()
@@ -216,7 +217,14 @@ function finishAuth(data: any, successMsg: string) {
     avatar_url: data.avatar_url,
   })
   ElMessage.success(successMsg)
-  router.push(getUser()?.is_admin ? '/admin/dashboard' : '/')
+
+  // 被路由守卫拦下来的页面，登录后回到原页面
+  const redirect = route.query.redirect
+  if (typeof redirect === 'string' && redirect.startsWith('/') && !redirect.startsWith('//')) {
+    router.replace(redirect)
+    return
+  }
+  router.push(isAdmin ? '/admin/dashboard' : '/')
 }
 
 async function onSubmit() {

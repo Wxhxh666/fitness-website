@@ -75,6 +75,7 @@ import { ref, reactive, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import { saveBodyGoal, deleteBodyGoal } from '@/api'
 import { fmtDisp, fmtNum, round1, kgToLb, lbToKg, weightUnitLabel } from '@/utils/units'
+import { ensureLogin } from '@/utils/authGuard'
 import type { Unit } from '@/utils/units'
 
 const visible = defineModel<boolean>('visible', { default: false })
@@ -176,6 +177,7 @@ async function saveGoal() {
     ElMessage.warning('请至少设定一个目标')
     return
   }
+  if (!ensureLogin('请先登录后再设定目标')) return
   const payload: any = {
     target_weight: goalForm.target_weight,
     target_bmi: goalForm.target_bmi,
@@ -193,6 +195,7 @@ async function saveGoal() {
 
 async function clearGoal() {
   if (!props.goal) return
+  if (!ensureLogin('请先登录后再操作')) return
   try {
     await deleteBodyGoal(props.goal.id)
     emit('cleared')

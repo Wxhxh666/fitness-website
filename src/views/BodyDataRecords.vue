@@ -3,6 +3,8 @@
     <!-- ============ 页面标题 ============ -->
     <PageHero label="DATA MANAGEMENT" title="数据管理" desc="围度记录、身材目标与历史数据存档，集中管理你的全部身体数据。" />
 
+    <GuestNotice v-if="!authed" />
+
     <!-- ============ 数据管理入口 ============ -->
     <DataEntryCards
       :meas-latest-text="measLatestText"
@@ -31,6 +33,7 @@
 <script setup lang="ts">
 import { reactive, onMounted } from 'vue'
 import PageHero from '@/components/PageHero.vue'
+import GuestNotice from '@/components/bodydata/GuestNotice.vue'
 import DataEntryCards from '@/components/bodydata/DataEntryCards.vue'
 import MeasurementDialog from '@/components/bodydata/MeasurementDialog.vue'
 import GoalManagerDialog from '@/components/bodydata/GoalManagerDialog.vue'
@@ -44,6 +47,7 @@ const {
   goalSavedAt,
   measLatestText,
   recordCount,
+  authed,
   loadAll,
   loadRecords,
   onGoalSaved,

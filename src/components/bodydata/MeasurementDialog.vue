@@ -34,6 +34,7 @@ import { ElMessage } from 'element-plus'
 import BarChart from '@/components/BarChart.vue'
 import { saveBodyRecord } from '@/api'
 import { dispValue, cmUnitLabel, cmField } from '@/utils/units'
+import { ensureLogin } from '@/utils/authGuard'
 import type { Unit } from '@/utils/units'
 
 const visible = defineModel<boolean>('visible', { default: false })
@@ -94,6 +95,7 @@ async function saveMeasurements() {
     ElMessage.warning('请至少填写一项围度')
     return
   }
+  if (!ensureLogin('请先登录后再保存围度')) return
   try {
     await saveBodyRecord(payload)
     ElMessage.success('围度已保存')

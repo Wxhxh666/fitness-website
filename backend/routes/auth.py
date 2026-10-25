@@ -1,18 +1,28 @@
 import random
 import string
-from datetime import datetime, timedelta
-from flask import jsonify, request
-from werkzeug.security import generate_password_hash, check_password_hash
-from models import db
-from utils.auth import generate_token, get_current_user
+from datetime import timedelta
+
+from flask import current_app, jsonify, request
+from werkzeug.security import check_password_hash, generate_password_hash
+
+from models import db, utcnow
 from models.auth import User, VerificationCode
-from models.profile_request import ProfileChangeRequest
-from models.body_record import BodyRecord, BodyProfile
+from models.body_record import BodyProfile, BodyRecord
 from models.diet_log import DietLog
 from models.diet_plan import DietPlan
+from models.profile_request import ProfileChangeRequest
 from models.user_plan import UserPlan
+from utils.auth import generate_token, get_current_user
+from utils.rate_limit import client_ip, json_field, rate_limit
 
 from . import auth_bp
+
+# 同一 IP 的验证码发送频率；同一账号的发送频率
+SEND_CODE_IP_LIMIT = (5, 60)          # 5 次 / 分钟
+SEND_CODE_ACCOUNT_LIMIT = (3, 60)     # 3 次 / 分钟
+LOGIN_IP_LIMIT = (20, 300)            # 20 次 / 5 分钟
+LOGIN_ACCOUNT_LIMIT = (8, 300)        # 8 次 / 5 分钟，防撞库
+REGISTER_LIMIT = (10, 3600)           # 10 次 / 小时
 
 
 def generate_code(length=6):
@@ -24,12 +34,34 @@ def is_valid_phone(phone: str) -> bool:
 
 
 def is_valid_email(email: str) -> bool:
-    return "@" in email and "." in email
+    return "@" in email and "." in email and " " not in email and len(email) <= 100
+
+
+def _is_local_request() -> bool:
+    """仅本机回环地址视为可信调试来源"""
+    ip = client_ip()
+    return ip in ("127.0.0.1", "::1", "localhost")
+
+
+def _login_payload(user):
+    return {
+        "user_id": user.id,
+        "nickname": user.nickname or (user.email or user.phone or "用户")[:4] + "***",
+        "token": generate_token(user.id),
+        "is_admin": bool(user.is_admin),
+        "avatar_url": user.avatar_url,
+    }
 
 
 @auth_bp.route("/send-code", methods=["POST"])
+@rate_limit(*SEND_CODE_IP_LIMIT, scope="send_code_ip")
+@rate_limit(*SEND_CODE_ACCOUNT_LIMIT, scope="send_code_account", key_func=json_field("identifier"))
 def send_code():
-    """发送验证码"""
+    """发送验证码
+
+    安全约定：响应体永远不返回验证码本身。
+    仅当「开发环境 + 本机请求」时，验证码会打印在后端控制台，方便本地联调。
+    """
     data = request.get_json(silent=True) or {}
     identifier = (data.get("identifier") or "").strip()
     purpose = data.get("purpose", "login")
@@ -44,36 +76,35 @@ def send_code():
         if not is_valid_phone(identifier):
             return jsonify(code=400, msg="手机号格式不正确（需11位数字）"), 400
 
-    # 生成验证码
-    code = generate_code()
+    # 作废该账号此前未使用的验证码，保证任一时刻只有一个有效码
+    VerificationCode.query.filter_by(
+        identifier=identifier, purpose=purpose, is_used=False
+    ).update({"is_used": True}, synchronize_session=False)
 
-    # 清理同一账号的过期验证码
+    # 清理历史过期记录（保留数据量可控）
     VerificationCode.query.filter(
         VerificationCode.identifier == identifier,
-        VerificationCode.is_used == False,
-        VerificationCode.expires_at < datetime.utcnow()
-    ).delete()
+        VerificationCode.expires_at < utcnow(),
+    ).delete(synchronize_session=False)
 
-    # 存储验证码（5分钟有效）
+    code = generate_code()
     vc = VerificationCode(
         identifier=identifier,
         code=code,
         purpose=purpose,
-        expires_at=datetime.utcnow() + timedelta(minutes=5)
+        expires_at=utcnow() + timedelta(minutes=5),
     )
     db.session.add(vc)
     db.session.commit()
 
-    # 开发环境直接返回验证码，方便测试
-    print(f"\n[验证码] {identifier} -> {code} (有效期5分钟)\n")
+    if current_app.config.get("IS_DEV") and _is_local_request():
+        current_app.logger.warning("[开发模式] 验证码 %s -> %s（5 分钟内有效）", identifier, code)
 
-    return jsonify(code=0, msg="验证码已发送", data={
-        "debug_code": code,  # 开发调试用，生产环境应移除
-        "expires_in": 300,
-    })
+    return jsonify(code=0, msg="验证码已发送", data={"expires_in": 300})
 
 
 @auth_bp.route("/register", methods=["POST"])
+@rate_limit(*REGISTER_LIMIT, scope="register_ip")
 def register():
     """注册（账号 + 密码，无需验证码）
 
@@ -82,12 +113,14 @@ def register():
     """
     data = request.get_json(silent=True) or {}
     identifier = (data.get("identifier") or "").strip()
-    password = (data.get("password") or "").strip()
+    password = data.get("password") or ""
 
     if not identifier:
         return jsonify(code=400, msg="请输入手机号或邮箱"), 400
     if not password or len(password) < 6:
         return jsonify(code=400, msg="密码至少6位"), 400
+    if len(password) > 128:
+        return jsonify(code=400, msg="密码过长"), 400
 
     # 格式校验：含 @ 视为邮箱，否则视为手机号。
     # 用“含 @”而不是“@ 和 . 都有”来判类型，否则 "abc@" 这类会落进手机号分支，
@@ -95,20 +128,15 @@ def register():
     if "@" in identifier:
         if not is_valid_email(identifier):
             return jsonify(code=400, msg="邮箱格式不正确"), 400
+        existing = User.query.filter_by(email=identifier).first()
     else:
         if not is_valid_phone(identifier):
             return jsonify(code=400, msg="手机号格式不正确（需11位数字）"), 400
-
-    # 检查是否已注册
-    if "@" in identifier:
-        existing = User.query.filter_by(email=identifier).first()
-    else:
         existing = User.query.filter_by(phone=identifier).first()
 
     if existing:
         return jsonify(code=400, msg="该账号已注册，请直接登录"), 400
 
-    # 创建用户
     user = User(
         email=identifier if "@" in identifier else None,
         phone=identifier if "@" not in identifier else None,
@@ -117,12 +145,13 @@ def register():
     )
     db.session.add(user)
     db.session.commit()
-    token = generate_token(user.id)
 
-    return jsonify(code=0, msg="注册成功", data={"user_id": user.id, "nickname": user.nickname, "token": token, "is_admin": user.is_admin, "avatar_url": user.avatar_url})
+    return jsonify(code=0, msg="注册成功", data=_login_payload(user))
 
 
 @auth_bp.route("/login", methods=["POST"])
+@rate_limit(*LOGIN_IP_LIMIT, scope="login_ip")
+@rate_limit(*LOGIN_ACCOUNT_LIMIT, scope="login_account", key_func=json_field("identifier"))
 def login():
     """验证码登录"""
     data = request.get_json(silent=True) or {}
@@ -134,7 +163,6 @@ def login():
     if not code:
         return jsonify(code=400, msg="请输入验证码"), 400
 
-    # 校验验证码
     vc = VerificationCode.query.filter_by(
         identifier=identifier, code=code, is_used=False
     ).order_by(VerificationCode.id.desc()).first()
@@ -142,7 +170,6 @@ def login():
     if not vc or vc.is_expired():
         return jsonify(code=400, msg="验证码无效或已过期"), 400
 
-    # 查找用户（未注册则提示）
     if "@" in identifier:
         user = User.query.filter_by(email=identifier).first()
     else:
@@ -153,20 +180,21 @@ def login():
     if user.is_active is False:
         return jsonify(code=400, msg="您的账号因异常被禁用，请联系管理员"), 400
 
-    user.last_login_at = datetime.utcnow()
+    user.last_login_at = utcnow()
     vc.is_used = True
     db.session.commit()
-    token = generate_token(user.id)
 
-    return jsonify(code=0, msg="登录成功", data={"user_id": user.id, "nickname": user.nickname or identifier[:4] + "***", "token": token, "is_admin": user.is_admin, "avatar_url": user.avatar_url})
+    return jsonify(code=0, msg="登录成功", data=_login_payload(user))
 
 
 @auth_bp.route("/password-login", methods=["POST"])
+@rate_limit(*LOGIN_IP_LIMIT, scope="pwd_login_ip")
+@rate_limit(*LOGIN_ACCOUNT_LIMIT, scope="pwd_login_account", key_func=json_field("identifier"))
 def password_login():
     """密码登录"""
     data = request.get_json(silent=True) or {}
     identifier = (data.get("identifier") or "").strip()
-    password = (data.get("password") or "").strip()
+    password = data.get("password") or ""
 
     if not identifier or not password:
         return jsonify(code=400, msg="请输入账号和密码"), 400
@@ -184,13 +212,10 @@ def password_login():
     if not check_password_hash(user.password_hash, password):
         return jsonify(code=400, msg="账号或密码错误"), 400
 
-    user.last_login_at = datetime.utcnow()
+    user.last_login_at = utcnow()
     db.session.commit()
-    token = generate_token(user.id)
 
-    return jsonify(code=0, msg="登录成功", data={"user_id": user.id, "nickname": user.nickname or identifier[:4] + "***", "token": token, "is_admin": user.is_admin, "avatar_url": user.avatar_url})
-
-
+    return jsonify(code=0, msg="登录成功", data=_login_payload(user))
 
 
 @auth_bp.route("/me", methods=["GET"])
@@ -199,6 +224,8 @@ def get_current_user_info():
     if not user:
         return jsonify(code=401, msg="未登录"), 401
     return jsonify(code=0, msg="success", data=user.to_dict())
+
+
 @auth_bp.route("/profile", methods=["GET"])
 def get_profile():
     user = get_current_user()
@@ -212,6 +239,7 @@ def get_profile():
     data["pending_changes"] = pending_info
     return jsonify(code=0, msg="success", data=data)
 
+
 @auth_bp.route("/profile", methods=["POST"])
 def update_profile():
     user = get_current_user()
@@ -224,6 +252,11 @@ def update_profile():
         return jsonify(code=400, msg="仅支持修改 nickname 或 avatar"), 400
     if not value:
         return jsonify(code=400, msg="值不能为空"), 400
+    if field == "nickname" and len(value) > 50:
+        return jsonify(code=400, msg="昵称过长（最多 50 字）"), 400
+    if field == "avatar" and len(value) > 256:
+        return jsonify(code=400, msg="头像地址过长"), 400
+
     model_field = {"avatar": "avatar_url"}.get(field, field)
     old_value = getattr(user, model_field, "") or ""
     existing = ProfileChangeRequest.query.filter_by(
@@ -266,9 +299,11 @@ def change_password():
         return jsonify(code=401, msg="未登录"), 401
     data = request.get_json(silent=True) or {}
     old_password = data.get("old_password") or ""
-    new_password = (data.get("new_password") or "").strip()
+    new_password = data.get("new_password") or ""
     if len(new_password) < 6:
         return jsonify(code=400, msg="新密码至少6位"), 400
+    if len(new_password) > 128:
+        return jsonify(code=400, msg="密码过长"), 400
     if user.password_hash and not check_password_hash(user.password_hash, old_password):
         return jsonify(code=400, msg="原密码不正确"), 400
     user.password_hash = generate_password_hash(new_password)
@@ -332,7 +367,7 @@ def dashboard_stats():
     plan_count = UserPlan.query.filter_by(user_id=uid).count()
     checkin_days = db.session.query(DietLog.log_date).filter_by(user_id=uid).distinct().count()
 
-    since = (datetime.utcnow() - timedelta(days=29)).strftime("%Y-%m-%d")
+    since = (utcnow() - timedelta(days=29)).strftime("%Y-%m-%d")
     weights = BodyRecord.query.filter(
         BodyRecord.user_id == uid,
         BodyRecord.record_date >= since,
@@ -353,4 +388,3 @@ def dashboard_stats():
         "weight_series": weight_series,
         "latest_record": latest.to_dict() if latest else None,
     })
-

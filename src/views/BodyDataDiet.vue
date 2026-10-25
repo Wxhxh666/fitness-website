@@ -3,6 +3,8 @@
     <!-- ============ 页面标题 ============ -->
     <PageHero label="AI DIET PLAN" title="AI 智能饮食规划" desc="结合身体指标、健身目标与饮食偏好，生成科学饮食方案，配套每日打卡与每周复盘。" />
 
+    <GuestNotice v-if="!authed" />
+
     <!-- ============ AI 智能饮食规划 ============ -->
     <section class="ai-diet section section-dark">
       <div class="container">
@@ -26,10 +28,11 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
 import PageHero from '@/components/PageHero.vue'
+import GuestNotice from '@/components/bodydata/GuestNotice.vue'
 import DietPlanner from '@/components/bodydata/DietPlanner.vue'
 import { useBodyData } from '@/composables/useBodyData'
 
-const { records, results, profile, activityOptions, loadAll } = useBodyData()
+const { records, results, profile, activityOptions, authed, loadAll } = useBodyData()
 
 onMounted(() => loadAll())
 </script>

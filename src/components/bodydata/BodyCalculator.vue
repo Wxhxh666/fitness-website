@@ -121,6 +121,7 @@
 import { ref, reactive, computed, watch } from 'vue'
 import { ElMessage } from 'element-plus'
 import { calculateBodyMetrics, saveBodyRecord } from '@/api'
+import { ensureLogin } from '@/utils/authGuard'
 import { fmtNum, fmtDisp, round1, cmField, weightField } from '@/utils/units'
 import type { Unit } from '@/utils/units'
 
@@ -271,6 +272,7 @@ function openSaveDialog() {
 }
 
 async function confirmSaveRecord() {
+  if (!ensureLogin('请先登录后再保存身材记录')) return
   try {
     const payload = {
       ...buildCalcPayload(),

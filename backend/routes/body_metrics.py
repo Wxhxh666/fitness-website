@@ -7,10 +7,10 @@ from urllib.parse import quote
 from flask import jsonify, request, send_file, Response
 
 from . import body_metrics_bp
-from utils.auth import get_current_user, require_auth
+from utils.auth import require_auth
 from models.body_metric import BodyMetric
 from models.body_record import BodyRecord, BodyGoal, BodyProfile
-from models import db
+from models import db, utcnow
 
 
 # ---------- 常量与公式 ----------
@@ -226,11 +226,6 @@ def build_health_tips(m):
     return tips
 
 
-def current_user_id():
-    user = get_current_user()
-    return user.id if user else 0
-
-
 def _upsert_metric(user_id, key, label, value, unit):
     """同步 legacy body_metrics 快照行，计算 change / trend"""
     if value is None:
@@ -242,10 +237,10 @@ def _upsert_metric(user_id, key, label, value, unit):
         row.value = new_value
         row.change = round(new_value - previous, 1)
         row.trend = "up" if row.change > 0 else "down" if row.change < 0 else "flat"
-        row.recorded_at = datetime.utcnow()
+        row.recorded_at = utcnow()
     else:
         row = BodyMetric(user_id=user_id, key=key, label=label, value=new_value,
-                         unit=unit, change=0.0, trend="flat", recorded_at=datetime.utcnow())
+                         unit=unit, change=0.0, trend="flat", recorded_at=utcnow())
         db.session.add(row)
 
 
@@ -253,9 +248,9 @@ def _upsert_metric(user_id, key, label, value, unit):
 
 
 @body_metrics_bp.route("", methods=["GET"])
-def get_metrics():
-    user = get_current_user()
-    user_id = user.id if user else 0
+@require_auth
+def get_metrics(user):
+    user_id = user.id
     keys = ["weight", "body_fat", "muscle_mass", "bmr"]
     qs = BodyMetric.query.filter(
         BodyMetric.user_id == user_id,
@@ -285,9 +280,9 @@ def calculate_bmi():
 
 
 @body_metrics_bp.route("/measurements", methods=["GET"])
-def get_measurements():
-    user = get_current_user()
-    user_id = user.id if user else 0
+@require_auth
+def get_measurements(user):
+    user_id = user.id
     keys = ["chest", "waist", "hips", "arm", "thigh", "calf"]
     qs = BodyMetric.query.filter(
         BodyMetric.user_id == user_id,
@@ -298,18 +293,27 @@ def get_measurements():
 
 @body_metrics_bp.route("/measurements/<int:measurement_id>", methods=["PUT"])
 @require_auth
-def update_measurement(measurement_id):
-    m = BodyMetric.query.get_or_404(measurement_id)
+def update_measurement(user, measurement_id):
+    # 归属校验必须在查询条件里完成：只按 id 查再比较 user_id 会漏判，且存在越权风险
+    m = BodyMetric.query.filter_by(id=measurement_id, user_id=user.id).first()
+    if not m:
+        return jsonify(code=404, msg="记录不存在"), 404
     data = request.get_json(silent=True) or {}
     new_value = data.get("value")
     if new_value is None:
         return jsonify(code=400, msg="请提供 value"), 400
+    try:
+        new_value = float(new_value)
+    except (TypeError, ValueError):
+        return jsonify(code=400, msg="value 必须是数字"), 400
+    if not (0 < new_value < 500):
+        return jsonify(code=400, msg="value 超出合理范围"), 400
 
     previous = m.value
-    m.value = round(float(new_value), 1)
+    m.value = round(new_value, 1)
     m.change = round(m.value - previous, 1)
     m.trend = "up" if m.change > 0 else "down" if m.change < 0 else "flat"
-    m.recorded_at = datetime.utcnow()
+    m.recorded_at = utcnow()
     db.session.commit()
 
     result = m.to_dict()
@@ -318,12 +322,16 @@ def update_measurement(measurement_id):
 
 
 @body_metrics_bp.route("/history", methods=["GET"])
-def get_history():
+@require_auth
+def get_history(user):
     metric_key = request.args.get("metric_key")
-    days = request.args.get("days", 30, type=int)
-    since = datetime.utcnow() - timedelta(days=days)
+    days = min(request.args.get("days", 30, type=int) or 30, 365)
+    since = utcnow() - timedelta(days=days)
 
-    q = BodyMetric.query.filter(BodyMetric.recorded_at >= since)
+    q = BodyMetric.query.filter(
+        BodyMetric.user_id == user.id,          # 之前漏了这个条件，会把所有人的数据一起返回
+        BodyMetric.recorded_at >= since,
+    )
     if metric_key:
         q = q.filter_by(key=metric_key)
 
@@ -356,8 +364,9 @@ def calculate():
 
 
 @body_metrics_bp.route("/records", methods=["GET"])
-def list_records():
-    user_id = current_user_id()
+@require_auth
+def list_records(user):
+    user_id = user.id
     days = request.args.get("days", type=int)
     limit = min(request.args.get("limit", 200, type=int), 1000)
 
@@ -373,9 +382,10 @@ def list_records():
 
 
 @body_metrics_bp.route("/records", methods=["POST"])
-def save_record():
+@require_auth
+def save_record(user):
     data = request.get_json(silent=True) or {}
-    user_id = current_user_id()
+    user_id = user.id
 
     # 缺少性别 / 年龄 / 强度时回退到个人档案
     profile = BodyProfile.query.filter_by(user_id=user_id).first()
@@ -448,8 +458,9 @@ def save_record():
 
 
 @body_metrics_bp.route("/records/compare", methods=["GET"])
-def compare_records():
-    user_id = current_user_id()
+@require_auth
+def compare_records(user):
+    user_id = user.id
     a_id = request.args.get("a", type=int)
     b_id = request.args.get("b", type=int)
     if not a_id or not b_id or a_id == b_id:
@@ -522,10 +533,10 @@ def compare_records():
 
 
 @body_metrics_bp.route("/records/<int:record_id>", methods=["DELETE"])
-def delete_record(record_id):
-    user_id = current_user_id()
-    record = BodyRecord.query.get(record_id)
-    if not record or record.user_id != user_id:
+@require_auth
+def delete_record(user, record_id):
+    record = BodyRecord.query.filter_by(id=record_id, user_id=user.id).first()
+    if not record:
         return jsonify(code=404, msg="记录不存在"), 404
     db.session.delete(record)
     db.session.commit()
@@ -533,17 +544,18 @@ def delete_record(record_id):
 
 
 @body_metrics_bp.route("/records", methods=["DELETE"])
-def delete_all_records():
-    user_id = current_user_id()
-    BodyRecord.query.filter_by(user_id=user_id).delete()
+@require_auth
+def delete_all_records(user):
+    BodyRecord.query.filter_by(user_id=user.id).delete()
     db.session.commit()
     return jsonify(code=0, msg="全部记录已清空")
 
 
 @body_metrics_bp.route("/export", methods=["GET"])
-def export_records():
+@require_auth
+def export_records(user):
     """导出全部身材记录为 Excel（xlsx，缺依赖时回退 CSV）"""
-    user_id = current_user_id()
+    user_id = user.id
     rows = BodyRecord.query.filter_by(user_id=user_id).order_by(
         BodyRecord.record_date.asc(), BodyRecord.id.asc()).all()
 
@@ -605,8 +617,9 @@ def export_records():
 
 
 @body_metrics_bp.route("/profile", methods=["GET"])
-def get_profile():
-    user_id = current_user_id()
+@require_auth
+def get_profile(user):
+    user_id = user.id
     profile = BodyProfile.query.filter_by(user_id=user_id).first()
     if not profile:
         return jsonify(code=0, msg="success", data={
@@ -617,9 +630,10 @@ def get_profile():
 
 
 @body_metrics_bp.route("/profile", methods=["POST"])
-def save_profile():
+@require_auth
+def save_profile(user):
     data = request.get_json(silent=True) or {}
-    user_id = current_user_id()
+    user_id = user.id
     profile = BodyProfile.query.filter_by(user_id=user_id).first()
     if not profile:
         profile = BodyProfile(user_id=user_id)
@@ -642,16 +656,18 @@ def save_profile():
 
 
 @body_metrics_bp.route("/goals", methods=["GET"])
-def list_goals():
-    user_id = current_user_id()
+@require_auth
+def list_goals(user):
+    user_id = user.id
     goals = BodyGoal.query.filter_by(user_id=user_id).order_by(BodyGoal.id.desc()).all()
     return jsonify(code=0, msg="success", data={"items": [g.to_dict() for g in goals]})
 
 
 @body_metrics_bp.route("/goals", methods=["POST"])
-def save_goal():
+@require_auth
+def save_goal(user):
     data = request.get_json(silent=True) or {}
-    user_id = current_user_id()
+    user_id = user.id
     target_weight = _num(data.get("target_weight"))
     target_bmi = _num(data.get("target_bmi"))
     target_body_fat = _num(data.get("target_body_fat"))
@@ -674,10 +690,10 @@ def save_goal():
 
 
 @body_metrics_bp.route("/goals/<int:goal_id>", methods=["DELETE"])
-def delete_goal(goal_id):
-    user_id = current_user_id()
-    goal = BodyGoal.query.get(goal_id)
-    if not goal or goal.user_id != user_id:
+@require_auth
+def delete_goal(user, goal_id):
+    goal = BodyGoal.query.filter_by(id=goal_id, user_id=user.id).first()
+    if not goal:
         return jsonify(code=404, msg="目标不存在"), 404
     db.session.delete(goal)
     db.session.commit()

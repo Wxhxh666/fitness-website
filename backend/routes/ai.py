@@ -12,8 +12,9 @@ from models.diet_plan import DietPlan
 from models.diet_log import DietLog
 from models.body_record import BodyRecord
 from models.weekly_review import WeeklyReview
-from models.auth import User
 from routes.body_metrics import compute_metrics, ACTIVITY_LABELS, GENDER_LABELS
+from utils.auth import require_auth
+from utils.rate_limit import check_budget
 
 
 TARGET_LABELS = {
@@ -254,7 +255,13 @@ def _fill_metrics(data):
 
 
 @ai_bp.route("/diet-plan", methods=["POST"])
-def generate_diet_plan():
+@require_auth
+def generate_diet_plan(user):
+    # AI 调用有真实成本，按用户限制频率（10 次 / 5 分钟）
+    limited = check_budget(f"ai_diet_plan:{user.id}", 10, 300)
+    if limited is not None:
+        return limited
+
     data = request.get_json(silent=True) or {}
 
     if not data.get("height_cm") or not data.get("weight_kg") or not data.get("age"):
@@ -316,15 +323,10 @@ def generate_diet_plan():
     })
 
 
-def _current_user_id():
-    from utils.auth import get_current_user
-    user = get_current_user()
-    return user.id if user else 0
-
-
 @ai_bp.route("/diet-plans", methods=["GET"])
-def list_diet_plans():
-    user_id = _current_user_id()
+@require_auth
+def list_diet_plans(user):
+    user_id = user.id
     items = DietPlan.query.filter_by(user_id=user_id).order_by(DietPlan.id.desc()).limit(50).all()
     data = []
     for p in items:
@@ -340,7 +342,8 @@ def list_diet_plans():
 
 
 @ai_bp.route("/diet-plans", methods=["POST"])
-def save_diet_plan():
+@require_auth
+def save_diet_plan(user):
     data = request.get_json(silent=True) or {}
     plan_json = data.get("plan_json")
     if not plan_json:
@@ -348,7 +351,7 @@ def save_diet_plan():
     target_key, _ = normalize_target(data.get("target"))
 
     record = DietPlan(
-        user_id=_current_user_id(),
+        user_id=user.id,
         target=target_key,
         sport_level=(data.get("sport_level") or "")[:32],
         diet_limit=(data.get("diet_limit") or "")[:256],
@@ -363,10 +366,10 @@ def save_diet_plan():
 
 
 @ai_bp.route("/diet-plans/<int:plan_id>", methods=["GET"])
-def get_diet_plan(plan_id):
-    user_id = _current_user_id()
-    record = DietPlan.query.get(plan_id)
-    if not record or record.user_id != user_id:
+@require_auth
+def get_diet_plan(user, plan_id):
+    record = DietPlan.query.filter_by(id=plan_id, user_id=user.id).first()
+    if not record:
         return jsonify(code=404, msg="方案不存在"), 404
     d = record.to_dict()
     try:
@@ -377,10 +380,10 @@ def get_diet_plan(plan_id):
 
 
 @ai_bp.route("/diet-plans/<int:plan_id>", methods=["DELETE"])
-def delete_diet_plan(plan_id):
-    user_id = _current_user_id()
-    record = DietPlan.query.get(plan_id)
-    if not record or record.user_id != user_id:
+@require_auth
+def delete_diet_plan(user, plan_id):
+    record = DietPlan.query.filter_by(id=plan_id, user_id=user.id).first()
+    if not record:
         return jsonify(code=404, msg="方案不存在"), 404
     db.session.delete(record)
     db.session.commit()
@@ -409,9 +412,10 @@ def _parse_date(value):
 
 
 @ai_bp.route("/diet-logs", methods=["GET"])
-def list_diet_logs():
-    user_id = _current_user_id()
-    days = request.args.get("days", 30, type=int)
+@require_auth
+def list_diet_logs(user):
+    user_id = user.id
+    days = min(request.args.get("days", 30, type=int) or 30, 365)
     since = date.today() - timedelta(days=max(days, 1) - 1)
     items = DietLog.query.filter(
         DietLog.user_id == user_id,
@@ -421,9 +425,10 @@ def list_diet_logs():
 
 
 @ai_bp.route("/diet-logs", methods=["POST"])
-def save_diet_log():
+@require_auth
+def save_diet_log(user):
     data = request.get_json(silent=True) or {}
-    user_id = _current_user_id()
+    user_id = user.id
     calories = _num(data.get("calories"))
     if calories is None or calories <= 0:
         return jsonify(code=400, msg="请填写当日摄入热量"), 400
@@ -444,10 +449,10 @@ def save_diet_log():
 
 
 @ai_bp.route("/diet-logs/<int:log_id>", methods=["DELETE"])
-def delete_diet_log(log_id):
-    user_id = _current_user_id()
-    log = DietLog.query.get(log_id)
-    if not log or log.user_id != user_id:
+@require_auth
+def delete_diet_log(user, log_id):
+    log = DietLog.query.filter_by(id=log_id, user_id=user.id).first()
+    if not log:
         return jsonify(code=404, msg="打卡记录不存在"), 404
     db.session.delete(log)
     db.session.commit()
@@ -559,15 +564,15 @@ def _save_review(user_id, week_start, review_text, summary, model):
 
 
 @ai_bp.route("/weekly-review", methods=["POST"])
-def weekly_review():
-    user_id = _current_user_id()
+@require_auth
+def weekly_review(user):
+    user_id = user.id
     summary = _week_summary(user_id)
     prompt = build_review_prompt(summary)
     mock = current_app.config.get("DEEPSEEK_MOCK", False) or not current_app.config.get("DEEPSEEK_API_KEY", "")
 
     # 读取用户默认 AI 模型偏好（deepseek-flash / doubao-lite）
-    pref_user = User.query.get(user_id)
-    model_pref = (pref_user.ai_model if pref_user else "") or "deepseek-flash"
+    model_pref = (user.ai_model if user else "") or "deepseek-flash"
     week_start = (date.today() - timedelta(days=date.today().weekday())).strftime("%Y-%m-%d")
 
     if mock:

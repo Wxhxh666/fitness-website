@@ -188,7 +188,8 @@ def update_exercise(user, exercise_id):
 def toggle_user_status(user, user_id):
     target = User.query.get_or_404(user_id)
     if target.is_admin:
-        return jsonify(code=400, msg="不能操作管理员账号"), 400  # ?????????
+        # 不允许通过后台互相禁用管理员，避免误操作把自己或他人锁死
+        return jsonify(code=400, msg="不能操作管理员账号"), 400
     target.is_active = not target.is_active
     db.session.commit()
     return jsonify(code=0, msg="success", data=target.to_dict(exclude=["password_hash"]))
@@ -197,15 +198,20 @@ def toggle_user_status(user, user_id):
 def get_review_requests(user):
     from models.profile_request import ProfileChangeRequest
     status_filter = request.args.get("status", "pending")
-    page = request.args.get("page", 1, type=int)
-    page_size = request.args.get("page_size", 20, type=int)
+    page = max(request.args.get("page", 1, type=int), 1)
+    page_size = min(max(request.args.get("page_size", 20, type=int), 1), 100)
     q = ProfileChangeRequest.query.filter_by(status=status_filter).order_by(ProfileChangeRequest.id.desc())
     total = q.count()
     items = q.offset((page - 1) * page_size).limit(page_size).all()
+
+    # 批量取用户，避免循环里逐条查询（N+1）
+    user_ids = {item.user_id for item in items}
+    users = {u.id: u for u in User.query.filter(User.id.in_(user_ids)).all()} if user_ids else {}
+
     result = []
     for item in items:
         d = item.to_dict()
-        u = User.query.get(item.user_id)
+        u = users.get(item.user_id)
         d["user_nickname"] = u.nickname if u else ""
         d["user_email"] = u.email if u else ""
         result.append(d)
@@ -217,7 +223,7 @@ def get_review_detail(user, rid):
     from models.profile_request import ProfileChangeRequest
     req = ProfileChangeRequest.query.get_or_404(rid)
     d = req.to_dict()
-    u = User.query.get(req.user_id)
+    u = db.session.get(User, req.user_id)
     d["user_nickname"] = u.nickname if u else ""
     d["user_email"] = u.email if u else ""
     return jsonify(code=0, msg="success", data=d)
@@ -229,10 +235,10 @@ def approve_review(user, rid):
     req = ProfileChangeRequest.query.get_or_404(rid)
     if req.status != "pending":
         return jsonify(code=400, msg="已处理"), 400
-    user = User.query.get(req.user_id)
-    if user:
+    target = db.session.get(User, req.user_id)
+    if target:
         model_field = {"avatar": "avatar_url"}.get(req.field_name, req.field_name)
-        setattr(user, model_field, req.new_value)
+        setattr(target, model_field, req.new_value)
     req.status = "approved"
     db.session.commit()
     return jsonify(code=0, msg="已通过审核", data=req.to_dict())

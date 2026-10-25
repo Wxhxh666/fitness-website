@@ -2,6 +2,9 @@
 // useBodyData · 身材数据模块共享状态（模块级单例）
 // 供「身体概览 / 指标趋势 / AI 饮食 / 数据管理」四个子页共用，
 // 避免各子页重复加载、单位/档案状态不同步。
+//
+// 私有数据接口现在都要求登录：未登录时不再发请求（否则后端会返回 401），
+// 只用本地缓存的档案兜底，页面照常可看、可算，但不会产生任何数据。
 // ============================================================
 import { ref, reactive, computed } from 'vue'
 import {
@@ -10,6 +13,7 @@ import {
   getBodyProfile,
   saveBodyProfile,
   getBodyGoals,
+  getToken,
 } from '@/api'
 import { fmtNum, dispValue, round1, weightUnitLabel } from '@/utils/units'
 import type { Unit } from '@/utils/units'
@@ -22,7 +26,15 @@ const legacyMetrics = ref<any[]>([])
 const goal = ref<any>(null)
 const goalSavedAt = ref('')
 const results = ref<any>(null)
-const loadedOnce = ref(false)
+// 初始值直接读 token，避免已登录用户进页面时闪一下“访客模式”提示条
+const authed = ref(!!getToken())
+
+/**
+ * 记录“上次是用哪个 token 加载的”。
+ * 用 token 而不是布尔值，才能覆盖「匿名浏览 → 登录 → 回到本页」的场景：
+ * token 变了就重新拉一次数据。
+ */
+let loadedToken: string | null = null
 
 export const activityOptions = [
   { value: 'sedentary', label: '久坐少动' },
@@ -58,7 +70,7 @@ function earliestWith(field: string) {
 // ---------- 核心指标卡片 ----------
 const topMetrics = computed(() => {
   const defs = [
-    { key: 'weight_kg', label: '体重', icon: 'Scale', unit: weightUnit.value },
+    { key: 'weight_kg', label: '体重', icon: 'Odometer', unit: weightUnit.value },
     { key: 'body_fat', label: '体脂率', icon: 'Histogram', unit: '%' },
     { key: 'muscle_mass', label: '肌肉量', icon: 'Aim', unit: weightUnit.value },
     { key: 'tdee', label: '每日消耗', icon: 'Lightning', unit: 'kcal' },
@@ -117,7 +129,20 @@ function onGoalCleared() {
 }
 
 // ---------- 加载 ----------
+function loadLocalProfile() {
+  const cached = localStorage.getItem('fitluxe_body_profile')
+  if (!cached) return
+  try {
+    const p = JSON.parse(cached)
+    profile.gender = p.gender || 'male'
+    profile.age = p.age || 25
+    profile.activity_level = p.activity_level || 'light'
+    unit.value = p.unit_system || 'metric'
+  } catch { /* 缓存损坏时忽略 */ }
+}
+
 async function loadRecords() {
+  if (!getToken()) { records.value = []; return }
   try {
     const res = await getBodyRecords()
     records.value = res.data.items
@@ -127,6 +152,7 @@ async function loadRecords() {
 }
 
 async function loadProfile() {
+  if (!getToken()) { loadLocalProfile(); return }
   try {
     const res = await getBodyProfile()
     profile.gender = res.data.gender || 'male'
@@ -134,53 +160,60 @@ async function loadProfile() {
     profile.activity_level = res.data.activity_level || 'light'
     unit.value = res.data.unit_system || 'metric'
   } catch {
-    const cached = localStorage.getItem('fitluxe_body_profile')
-    if (cached) {
-      try {
-        const p = JSON.parse(cached)
-        profile.gender = p.gender || 'male'
-        profile.age = p.age || 25
-        profile.activity_level = p.activity_level || 'light'
-        unit.value = p.unit_system || 'metric'
-      } catch { /* ignore */ }
-    }
+    loadLocalProfile()
   }
 }
 
 async function loadGoals() {
+  if (!getToken()) { goal.value = null; return }
   try {
     const res = await getBodyGoals()
     if (res.data.items.length) {
       goal.value = res.data.items[0]
       goalSavedAt.value = (goal.value.updated_at || '').slice(0, 10) || new Date().toISOString().slice(0, 10)
     }
-  } catch { /* ignore */ }
+  } catch { /* 未登录或接口异常时保持空目标 */ }
 }
 
 async function loadLegacyMetrics() {
+  if (!getToken()) { legacyMetrics.value = []; return }
   try {
     const res = await getBodyMetrics()
     legacyMetrics.value = res.data
   } catch { /* ignore */ }
 }
 
-/** 首次进入任一身材子页时一次性加载全部数据 */
+/** 首次进入任一身材子页（或登录状态变化）时加载全部数据 */
 async function loadAll() {
-  if (loadedOnce.value) return
-  loadedOnce.value = true
+  const token = getToken()
+  authed.value = !!token
+  if (!token) {
+    loadedToken = null
+    records.value = []
+    legacyMetrics.value = []
+    goal.value = null
+    loadLocalProfile()
+    return
+  }
+  if (loadedToken === token) return
+  loadedToken = token
   await Promise.all([loadRecords(), loadProfile(), loadGoals()])
   await loadLegacyMetrics()
 }
 
+/** 登录 / 退出后调用，强制下次进入页面重新拉取 */
+function resetLoaded() {
+  loadedToken = null
+}
+
 // ---------- 档案 ----------
 async function saveProfile() {
-  try {
-    await saveBodyProfile({ ...profile, unit_system: unit.value })
-    localStorage.setItem('fitluxe_body_profile', JSON.stringify({ ...profile, unit_system: unit.value }))
-    return true
-  } catch (e: any) {
-    throw e
+  if (!getToken()) {
+    throw new Error('请先登录后再保存档案')
   }
+  await saveBodyProfile({ ...profile, unit_system: unit.value })
+  localStorage.setItem('fitluxe_body_profile', JSON.stringify({ ...profile, unit_system: unit.value }))
+  return true
 }
 
 export function useBodyData() {
@@ -192,6 +225,7 @@ export function useBodyData() {
     goal,
     goalSavedAt,
     results,
+    authed,
     activityOptions,
     weightUnit,
     topMetrics,
@@ -207,5 +241,6 @@ export function useBodyData() {
     loadRecords,
     loadProfile,
     saveProfile,
+    resetLoaded,
   }
 }

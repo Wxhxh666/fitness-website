@@ -3,6 +3,8 @@
     <!-- ============ 页面标题 ============ -->
     <PageHero label="METRICS & TRENDS" title="指标计算与趋势" desc="计算 BMI、体脂率、BMR、TDEE 等多维指标，跟踪历史身材数据趋势。" />
 
+    <GuestNotice v-if="!authed" />
+
     <!-- ============ 指标计算与趋势 ============ -->
     <section class="analytics section section-light">
       <div class="container">
@@ -33,12 +35,13 @@
 <script setup lang="ts">
 import { reactive, onMounted } from 'vue'
 import PageHero from '@/components/PageHero.vue'
+import GuestNotice from '@/components/bodydata/GuestNotice.vue'
 import BodyCalculator from '@/components/bodydata/BodyCalculator.vue'
 import TrendHistory from '@/components/bodydata/TrendHistory.vue'
 import HistoryArchiveDialog from '@/components/bodydata/HistoryArchiveDialog.vue'
 import { useBodyData } from '@/composables/useBodyData'
 
-const { unit, profile, records, activityOptions, onCalculated, loadAll, loadRecords } = useBodyData()
+const { unit, profile, records, activityOptions, authed, onCalculated, loadAll, loadRecords } = useBodyData()
 const historyDialog = reactive({ visible: false })
 
 onMounted(() => loadAll())

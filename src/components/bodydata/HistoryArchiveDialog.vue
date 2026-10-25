@@ -79,6 +79,7 @@ import {
   exportBodyRecords,
 } from '@/api'
 import { fmtNum, fmtDisp, weightUnitLabel } from '@/utils/units'
+import { ensureLogin } from '@/utils/authGuard'
 import type { Unit } from '@/utils/units'
 
 const visible = defineModel<boolean>('visible', { default: false })
@@ -142,6 +143,7 @@ function diffClass(d: any) {
 }
 
 async function onDeleteRecord(id: number) {
+  if (!ensureLogin('请先登录后再操作')) return
   try {
     await deleteBodyRecord(id)
     ElMessage.success('已删除')
@@ -152,6 +154,7 @@ async function onDeleteRecord(id: number) {
 }
 
 async function onClearAll() {
+  if (!ensureLogin('请先登录后再操作')) return
   try {
     await deleteAllBodyRecords()
     ElMessage.success('全部记录已清空')
@@ -163,6 +166,7 @@ async function onClearAll() {
 }
 
 async function onExport() {
+  if (!ensureLogin('请先登录后再导出')) return
   try {
     const blob = await exportBodyRecords()
     const isCsv = blob.type.includes('csv')
