@@ -3,7 +3,7 @@
     <div class="admin-page__toolbar">
       <span class="admin-page__count">共 {{ total }} 个动作</span>
       <div style="flex:1"></div>
-      <el-button type="primary" @click="showAddDialog = true">
+      <el-button type="primary" @click="openCreate">
         <el-icon><Plus /></el-icon> 新增动作
       </el-button>
     </div>
@@ -40,10 +40,15 @@
           </el-button>
         </template>
       </el-table-column>
+      <el-table-column label="操作" width="80" align="center" fixed="right">
+        <template #default="{ row }">
+          <el-button size="small" text type="primary" @click="openEdit(row)">编辑</el-button>
+        </template>
+      </el-table-column>
     </el-table>
 
-    <!-- Add Exercise Dialog -->
-    <el-dialog v-model="showAddDialog" title="新增动作" width="560px" :close-on-click-modal="false">
+    <!-- Add / Edit Exercise Dialog -->
+    <el-dialog v-model="showAddDialog" :title="editingId ? '编辑动作' : '新增动作'" width="560px" :close-on-click-modal="false">
       <el-form :model="form" label-position="top" ref="formRef" :rules="formRules">
         <el-form-item label="动作名称" prop="name">
           <el-input v-model="form.name" placeholder="请输入动作名称" />
@@ -78,7 +83,7 @@
       </el-form>
       <template #footer>
         <el-button @click="showAddDialog = false">取消</el-button>
-        <el-button type="primary" @click="submitExercise" :loading="submitting">提交创建</el-button>
+        <el-button type="primary" @click="submitExercise" :loading="submitting">{{ editingId ? "保存修改" : "提交创建" }}</el-button>
       </template>
     </el-dialog>
 
@@ -117,6 +122,7 @@ const videoFileInput = ref<HTMLInputElement>()
 const coverUploadTarget = ref<any>(null)
 const coverFileInput = ref<HTMLInputElement>()
 const submitting = ref(false)
+const editingId = ref<number | null>(null)
 const categories = ref<any[]>([])
 const formRef = ref<FormInstance>()
 const form = reactive({
@@ -133,10 +139,13 @@ const formRules = {
   difficulty: [{ required: true, message: "请选择难度等级", trigger: "change" }],
 }
 
+// 后端接口地址去掉 /api 得到站点根，避免硬编码 127.0.0.1（部署后图片会裂）
+const API_ORIGIN = API_BASE_URL.replace(/\/api\/?$/, "")
+
 function fullUrl(path: string) {
   if (!path) return ""
   if (path.startsWith("http")) return path
-  return "http://127.0.0.1:8000" + path
+  return API_ORIGIN + path
 }
 
 async function load() {
@@ -248,11 +257,26 @@ async function onCoverImageSelected(e: Event) {
 }
 
 function previewVideo(row: any) {
-  videoPreviewUrl.value = row.video_url
-  if (videoPreviewUrl.value && videoPreviewUrl.value.startsWith('/')) {
-    videoPreviewUrl.value = 'http://127.0.0.1:8000' + videoPreviewUrl.value
-  }
+  videoPreviewUrl.value = fullUrl(row.video_url)
   showVideoDialog.value = true
+}
+
+function openCreate() {
+  editingId.value = null
+  form.name = ""; form.category = ""; form.difficulty = "intermediate"
+  form.duration = ""; form.description = ""; form.cover_url = ""
+  showAddDialog.value = true
+}
+
+function openEdit(row: any) {
+  editingId.value = row.id
+  form.name = row.name || ""
+  form.category = row.category || ""
+  form.difficulty = row.difficulty || "intermediate"
+  form.duration = row.duration || ""
+  form.description = row.description || row.desc || ""
+  form.cover_url = row.cover_url || ""
+  showAddDialog.value = true
 }
 
 async function submitExercise() {
@@ -261,14 +285,20 @@ async function submitExercise() {
   if (!valid) return
   submitting.value = true
   try {
-    await createExercise({ ...form })
-    ElMessage.success("动作创建成功")
+    if (editingId.value) {
+      await updateExercise(editingId.value, { ...form })
+      ElMessage.success("动作已更新")
+    } else {
+      await createExercise({ ...form })
+      ElMessage.success("动作创建成功")
+    }
     showAddDialog.value = false
+    editingId.value = null
     form.name = ""; form.category = ""; form.difficulty = "intermediate"
     form.duration = ""; form.description = ""; form.cover_url = ""
     load()
   } catch (e: any) {
-    ElMessage.error(e?.message || "创建失败")
+    ElMessage.error(e?.message || "提交失败")
   } finally {
     submitting.value = false
   }

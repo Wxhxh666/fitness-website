@@ -51,6 +51,10 @@ export function createPlan(data: any) {
   return http.post<any, { code: number; data: any }>('/admin/plans', data)
 }
 
+export function updatePlan(planId: number, data: any) {
+  return http.put<any, { code: number; data: any }>('/admin/plans/' + planId, data)
+}
+
 // ---------- Review ----------
 export function getReviewRequests(status = "pending") {
   return http.get<any, { code: number; data: { items: any[]; total: number } }>("/admin/review-requests", { params: { status, page_size: 50 } })

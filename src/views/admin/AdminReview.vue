@@ -63,16 +63,18 @@ async function load() {
 }
 
 function showDetail(row: any) {
+  // 纯文本展示：申请内容来自普通用户，绝不能用 dangerouslyUseHTMLString 直接插值（存储型 XSS）
+  const fieldMap: Record<string, string> = { nickname: "昵称", avatar: "头像" }
   ElMessageBox.alert(
-    `<div style="font-size:13px;line-height:2;">
-      <p><b>用户：</b>${row.user_nickname || row.user_email}</p>
-      <p><b>字段：</b>${row.field_name === "nickname" ? "昵称" : "头像"}</p>
-      <p><b>旧值：</b>${row.old_value || "-"}</p>
-      <p><b>申请值：</b>${row.new_value}</p>
-      <p><b>时间：</b>${row.created_at?.slice(0,16)?.replace("T"," ")}</p>
-    </div>`,
+    [
+      `用户：${row.user_nickname || row.user_email || "-"}`,
+      `字段：${fieldMap[row.field_name] || row.field_name}`,
+      `旧值：${row.old_value || "-"}`,
+      `申请值：${row.new_value || "-"}`,
+      `时间：${row.created_at?.slice(0, 16)?.replace("T", " ") || "-"}`,
+    ].join("\n"),
     "申请详情",
-    { dangerouslyUseHTMLString: true }
+    { customStyle: { whiteSpace: "pre-line" } as never }
   )
 }
 

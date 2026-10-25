@@ -63,7 +63,8 @@ async function toggleStatus(user: any) {
     ElMessage.success(user.is_active ? "已禁用" : "已启用")
     load()
   } catch (e: any) {
-    ElMessage.error(e?.message?.includes("\\u8bf7\\u5148\\u767b\\u5f55") ? "登录已过期，请刷新页面后重新登录" : (e?.message || "操作失败"))
+    // 401 已由 http 拦截器统一处理（清 token + 跳登录），这里只提示业务错误
+    ElMessage.error(e?.message || "操作失败")
   } finally {
     togglingId.value = null
   }

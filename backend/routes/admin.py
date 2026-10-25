@@ -32,7 +32,8 @@ def dashboard(user):
 def get_messages(user):
     page = request.args.get("page", 1, type=int)
     page_size = request.args.get("page_size", 20, type=int)
-    q = ContactMessage.query.order_by(ContactMessage.id)
+    # 最新留言排前面，管理员先处理新消息
+    q = ContactMessage.query.order_by(ContactMessage.id.desc())
     total = q.count()
     items = q.offset((page - 1) * page_size).limit(page_size).all()
     return jsonify(code=0, msg="success", data={
@@ -112,6 +113,25 @@ def create_plan(user):
     db.session.add(plan)
     db.session.commit()
     return jsonify(code=0, msg="计划创建成功", data=plan.to_dict()), 201
+
+
+@admin_bp.route("/plans/<int:plan_id>", methods=["PUT"])
+@require_admin
+def update_plan(user, plan_id):
+    """编辑训练计划（动作管理同款：基础字段可改，难度联动显示名）"""
+    plan = Plan.query.get_or_404(plan_id)
+    data = request.get_json(silent=True) or {}
+    for field in ["name", "goal", "badge", "description", "duration", "frequency", "cover_url"]:
+        if field in data:
+            val = data[field]
+            if isinstance(val, str):
+                val = val.strip()
+            setattr(plan, field, val)
+    if "difficulty" in data and data["difficulty"] in {"beginner", "intermediate", "advanced"}:
+        plan.difficulty = data["difficulty"]
+        plan.difficulty_label = {"beginner": "入门", "intermediate": "中级", "advanced": "高级"}[data["difficulty"]]
+    db.session.commit()
+    return jsonify(code=0, msg="计划更新成功", data=plan.to_dict())
 
 
 @admin_bp.route("/body-metrics", methods=["GET"])

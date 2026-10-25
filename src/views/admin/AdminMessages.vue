@@ -8,10 +8,10 @@
       <el-table-column prop="name" label="姓名" width="100" />
       <el-table-column prop="email" label="邮箱" width="180" />
       <el-table-column prop="phone" label="电话" width="130" />
-      <el-table-column prop="subject" label="主题" width="100" />
+      <el-table-column prop="subject" label="主题" width="100" show-overflow-tooltip />
       <el-table-column label="留言内容" min-width="200">
         <template #default="{ row }">
-          <span style="color:#666;font-size:13px;">{{ row.message.length > 50 ? row.message.slice(0,50) + "..." : row.message }}</span>
+          <span style="color:#666;font-size:13px;">{{ (row.message || "").length > 50 ? (row.message || "").slice(0,50) + "..." : (row.message || "-") }}</span>
         </template>
       </el-table-column>
       <el-table-column label="状态" width="80" align="center">

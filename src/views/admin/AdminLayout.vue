@@ -61,6 +61,7 @@ const pageTitle = computed(() => {
     "/admin/users": "用户管理",
     "/admin/exercises": "动作管理",
     "/admin/plans": "计划管理",
+    "/admin/review": "申请审核",
   }
   return m[route.path] || "管理后台"
 })
