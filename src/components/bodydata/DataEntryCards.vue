@@ -9,7 +9,7 @@
       </div>
       <div class="data-entry__grid">
         <div class="data-entry__card" @click="emit('open-measurements')">
-          <div class="data-entry__icon"><el-icon :size="28"><Ruler /></el-icon></div>
+          <div class="data-entry__icon"><el-icon :size="28"><Crop /></el-icon></div>
           <h3 class="data-entry__title">围度记录</h3>
           <p class="data-entry__desc">胸围、肩宽、腰围、臀围、大腿围、手臂围测量存档与变化柱状图。</p>
           <span class="data-entry__meta">最近测量：{{ measLatestText }}</span>

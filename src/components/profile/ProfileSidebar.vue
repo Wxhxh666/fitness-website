@@ -31,6 +31,7 @@ const items = [
   { key: 'body', label: '我的身材档案', icon: 'DataAnalysis' },
   { key: 'diet', label: 'AI饮食方案库', icon: 'Bowl' },
   { key: 'plans', label: '我的训练计划', icon: 'Calendar' },
+  { key: 'achievements', label: '成就勋章', icon: 'Trophy' },
   { key: 'weekly', label: '饮食打卡周报', icon: 'DocumentChecked' },
   { key: 'prefs', label: '系统偏好设置', icon: 'Setting' },
 ]

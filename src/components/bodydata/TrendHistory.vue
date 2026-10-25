@@ -2,7 +2,7 @@
   <div class="analytics__right">
     <div class="panel-card">
       <div class="panel-card__head">
-        <h3 class="panel-card__title"><el-icon><Scale /></el-icon>BMI 参考标准</h3>
+        <h3 class="panel-card__title"><el-icon><Odometer /></el-icon>BMI 参考标准</h3>
       </div>
       <div class="bmi-guide">
         <div class="bmi-guide__row"><span class="bmi-guide__range">&lt; 18.5</span><span class="bmi-guide__label">偏瘦</span></div>
