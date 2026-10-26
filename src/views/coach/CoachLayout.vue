@@ -12,12 +12,8 @@
           :class="{ 'is-active': route.path === item.path }">
           <el-icon><component :is="item.icon" /></el-icon>
           <span>{{ item.label }}</span>
+          <em v-if="item.key === 'students' && pendingTotal > 0" class="coach-sidebar__badge">{{ pendingTotal > 99 ? '99+' : pendingTotal }}</em>
         </router-link>
-        <span class="coach-sidebar__link is-disabled" title="M3 即将上线">
-          <el-icon><UserFilled /></el-icon>
-          <span>学员管理</span>
-          <em class="coach-sidebar__soon">即将上线</em>
-        </span>
       </nav>
       <div class="coach-sidebar__footer">
         <router-link to="/profile" class="coach-sidebar__link">
@@ -48,26 +44,37 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref } from "vue"
+import { computed, onMounted, ref } from "vue"
 import { useRoute } from "vue-router"
 import { getUser } from "@/api"
+import { getCoachStudents } from "@/api/coach"
 import { DataBoard, User, UserFilled, HomeFilled } from "@element-plus/icons-vue"
 
 const route = useRoute()
 const user = ref(getUser())
+const pendingTotal = ref(0)
 
 const pageTitle = computed(() => {
   const m: Record<string, string> = {
     "/coach/dashboard": "工作台概览",
     "/coach/profile": "我的教练资料",
+    "/coach/students": "学员管理",
   }
   return m[route.path] || "教练工作台"
 })
 
 const menuItems = [
   { path: "/coach/dashboard", label: "工作台概览", icon: "DataBoard" },
+  { path: "/coach/students", label: "学员管理", icon: "UserFilled", key: "students" },
   { path: "/coach/profile", label: "我的教练资料", icon: "Notebook" },
 ]
+
+onMounted(async () => {
+  try {
+    const res = await getCoachStudents("pending")
+    pendingTotal.value = res.data.pending_total
+  } catch { /* 未成为教练或网络问题不阻塞布局 */ }
+})
 </script>
 
 <style scoped>
@@ -94,9 +101,9 @@ const menuItems = [
 .coach-sidebar__link:hover { color: #0CD8A0; background: rgba(255,255,255,0.03); }
 .coach-sidebar__link.is-active { color: #0CD8A0; background: rgba(12,216,160,0.08); }
 .coach-sidebar__link.is-disabled { opacity: 0.55; cursor: not-allowed; }
-.coach-sidebar__soon {
-  margin-left: auto; font-size: 10px; font-style: normal; color: #6d837c;
-  border: 1px solid #2c443c; border-radius: 8px; padding: 1px 6px;
+.coach-sidebar__badge {
+  margin-left: auto; font-size: 10px; font-style: normal; color: #fff;
+  background: #e67e22; border-radius: 8px; padding: 1px 6px; min-width: 18px; text-align: center;
 }
 .coach-sidebar__footer { border-top: 1px solid rgba(255,255,255,0.06); padding: 8px 0; }
 .coach-main { margin-left: 220px; flex: 1; display: flex; flex-direction: column; min-width: 0; }

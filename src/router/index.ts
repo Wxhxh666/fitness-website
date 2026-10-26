@@ -50,7 +50,13 @@ const router = createRouter({
         { path: '', redirect: '/coach/dashboard' },
         { path: 'dashboard', component: () => import('@/views/coach/CoachDashboard.vue'), meta: { title: '教练工作台' } },
         { path: 'profile', component: () => import('@/views/coach/CoachProfileEdit.vue'), meta: { title: '教练资料' } },
+        { path: 'students', component: () => import('@/views/coach/CoachStudentsView.vue'), meta: { title: '学员管理' } },
       ],
+    },
+    {
+      path: '/coaches',
+      component: () => import('@/views/CoachListView.vue'),
+      meta: { requiresAuth: true, title: '认证教练' },
     },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],

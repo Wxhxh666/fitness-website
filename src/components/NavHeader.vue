@@ -53,6 +53,7 @@
             <transition name="dropdown-fade">
               <div v-if="showDropdown" class="nav-header__dropdown" @mouseenter="showDropdown=true" @mouseleave="showDropdown=false">
                 <router-link to="/profile" class="nav-header__dropdown-item">个人中心</router-link>
+                <router-link to="/coaches" class="nav-header__dropdown-item">找教练</router-link>
                 <router-link v-if="user?.is_coach" to="/coach/dashboard" class="nav-header__dropdown-item">教练工作台</router-link>
                 <router-link v-if="user?.is_admin" to="/admin/dashboard" class="nav-header__dropdown-item">管理后台</router-link>
                 <div class="nav-header__dropdown-divider"></div>

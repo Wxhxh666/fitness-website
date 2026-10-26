@@ -6,7 +6,7 @@ import {
   Aim, ArrowDown, ArrowRight, Bottom, Bowl, Calendar, ChatDotRound, Check, CircleCheck, Clock,
   Close, CoffeeCup, Compass, Crop, DataAnalysis, DataBoard, Delete, DocumentChecked, Download,
   Edit, Files, FirstAidKit, Flag, FolderAdd, Histogram, HomeFilled, InfoFilled, KnifeFork,
-  Lightning, Link, List, Location, Lock, MagicStick, Medal, Message, Notebook, Odometer, Phone,
+  Connection, Lightning, Link, List, Location, Lock, MagicStick, Medal, Message, Notebook, Odometer, Phone,
   Plus, Promotion, Refresh, Select, Setting, Sunny, Sunrise, Switch, Timer, Top, TrendCharts,
   Trophy, TrophyBase, User, UserFilled, VideoCamera, Warning,
 } from '@element-plus/icons-vue'
@@ -27,7 +27,7 @@ const ICONS = {
   Aim, ArrowDown, ArrowRight, Bottom, Bowl, Calendar, ChatDotRound, Check, CircleCheck, Clock,
   Close, CoffeeCup, Compass, Crop, DataAnalysis, DataBoard, Delete, DocumentChecked, Download,
   Edit, Files, FirstAidKit, Flag, FolderAdd, Histogram, HomeFilled, InfoFilled, KnifeFork,
-  Lightning, Link, List, Location, Lock, MagicStick, Medal, Message, Notebook, Odometer, Phone,
+  Connection, Lightning, Link, List, Location, Lock, MagicStick, Medal, Message, Notebook, Odometer, Phone,
   Plus, Promotion, Refresh, Select, Setting, Sunny, Sunrise, Switch, Timer, Top, TrendCharts,
   Trophy, TrophyBase, User, UserFilled, VideoCamera, Warning,
 }

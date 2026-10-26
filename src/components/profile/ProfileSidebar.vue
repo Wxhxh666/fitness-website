@@ -33,6 +33,7 @@ const items = [
   { key: 'plans', label: '我的训练计划', icon: 'Calendar' },
   { key: 'achievements', label: '成就勋章', icon: 'Trophy' },
   { key: 'coach', label: '教练认证', icon: 'Medal' },
+  { key: 'mycoaches', label: '我的教练', icon: 'Connection' },
   { key: 'weekly', label: '饮食打卡周报', icon: 'DocumentChecked' },
   { key: 'prefs', label: '系统偏好设置', icon: 'Setting' },
 ]

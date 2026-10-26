@@ -67,3 +67,60 @@ export function updateCoachProfile(data: Partial<{
 export function getCoachDashboard() {
   return http.get<any, { code: number; data: any }>('/coaches/dashboard')
 }
+
+// ---------- M3 学员体系 ----------
+export function getCoachList() {
+  return http.get<any, { code: number; data: { items: any[] } }>('/coaches')
+}
+
+export function subscribeCoach(coachUserId: number, message?: string) {
+  return http.post<any, { code: number; msg: string; data: any }>(
+    `/coaches/${coachUserId}/subscribe`,
+    { message: message || '' },
+  )
+}
+
+export function getMyCoaches() {
+  return http.get<any, { code: number; data: { items: any[] } }>('/coaches/mine')
+}
+
+export function terminateCoach(coachUserId: number) {
+  return http.delete<any, { code: number; msg: string }>(`/coaches/mine/${coachUserId}`)
+}
+
+export function getCoachStudents(status = 'all') {
+  return http.get<any, { code: number; data: { items: any[]; pending_total: number } }>(
+    '/coaches/students',
+    { params: { status } },
+  )
+}
+
+export function acceptStudent(relationId: number) {
+  return http.put<any, { code: number; msg: string; data: any }>(`/coaches/students/${relationId}/accept`)
+}
+
+export function rejectStudent(relationId: number, reason: string) {
+  return http.put<any, { code: number; data: any }>(`/coaches/students/${relationId}/reject`, { reason })
+}
+
+export function getStudentOverview(relationId: number) {
+  return http.get<any, { code: number; data: any }>(`/coaches/students/${relationId}/overview`)
+}
+
+export function getMessages(relationId: number, afterId = 0) {
+  return http.get<any, { code: number; data: { relation: any; me: number; items: any[] } }>(
+    `/coaches/students/${relationId}/messages`,
+    { params: { after_id: afterId } },
+  )
+}
+
+export function sendMessage(relationId: number, content: string) {
+  return http.post<any, { code: number; data: any }>(
+    `/coaches/students/${relationId}/messages`,
+    { content },
+  )
+}
+
+export function getUnreadTotal() {
+  return http.get<any, { code: number; data: { total: number } }>('/coaches/unread-total')
+}

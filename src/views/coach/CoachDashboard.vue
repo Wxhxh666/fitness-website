@@ -29,9 +29,13 @@
         </el-button>
       </div>
 
-      <el-alert type="info" :closable="false" show-icon style="margin-top:20px;"
-        title="学员管理与教练计划发布即将上线"
-        description="用户选择教练、学员训练数据查看、教练发布训练计划（管理员审核后上架）已在开发计划中，敬请期待。" />
+      <el-alert v-if="(data?.students_pending ?? 0) > 0" type="warning" :closable="false" show-icon style="margin-top:20px;"
+        :title="`你有 ${data.students_pending} 条待处理的学员申请`">
+        <el-button size="small" type="primary" text @click="$router.push('/coach/students')">去处理</el-button>
+      </el-alert>
+      <el-alert v-else type="info" :closable="false" show-icon style="margin-top:20px;"
+        title="教练计划发布即将上线"
+        description="教练发布训练计划（管理员审核后上架）已在开发计划中，敬请期待。" />
     </template>
   </div>
 </template>
@@ -44,6 +48,7 @@ import { Medal, Timer, User, Notebook } from "@element-plus/icons-vue"
 const loading = ref(true)
 const profile = ref<any>(null)
 const certifiedDays = ref<number | null>(null)
+const data = ref<any>(null)
 
 const CERT_LABELS: Record<string, string> = {
   national: "国家职业资格（国职）", ace: "ACE", nssa: "NSCA-CPT", other: "其他",
@@ -53,13 +58,14 @@ function certLabel(k?: string) { return k ? (CERT_LABELS[k] || k) : "-" }
 const stats = computed(() => [
   { key: "days", icon: Medal, label: "认证天数", value: certifiedDays.value ?? "-", bg: "rgba(12,216,160,0.12)" },
   { key: "years", icon: Timer, label: "执教年限", value: (profile.value?.years ?? 0) + " 年", bg: "rgba(52,152,219,0.1)" },
-  { key: "students", icon: User, label: "学员数", value: "即将上线", bg: "rgba(201,169,110,0.14)" },
+  { key: "students", icon: User, label: "在学学员", value: data.value?.students_active ?? 0, bg: "rgba(201,169,110,0.14)" },
   { key: "plans", icon: Notebook, label: "我的计划", value: "即将上线", bg: "rgba(155,89,182,0.1)" },
 ])
 
 onMounted(async () => {
   try {
     const res = await getCoachDashboard()
+    data.value = res.data
     profile.value = res.data?.profile
     certifiedDays.value = res.data?.certified_days
   } catch { /* */ }
