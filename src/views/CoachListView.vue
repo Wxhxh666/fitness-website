@@ -122,7 +122,7 @@ onMounted(load)
 </script>
 
 <style scoped>
-.coach-list-page { max-width: 1100px; margin: 0 auto; padding: 32px 24px 60px; }
+.coach-list-page { max-width: 1100px; margin: 0 auto; padding: 112px 24px 60px; }
 .coach-list-hero { margin-bottom: 28px; }
 .coach-list-hero__title { font-family: "Playfair Display", serif; font-size: 32px; color: #1a1a1a; margin: 0 0 8px; }
 .coach-list-hero__sub { color: #777; font-size: 14px; margin: 0; }
