@@ -34,3 +34,6 @@ Thumbs.db
 src/views/BodyDataView.legacy.vue
 src/views/BodyDataView.v3.legacy.vue
 src/views/__delete_test.legacy.tmp
+
+# 证件等敏感文件（绝不入库）
+backend/storage/

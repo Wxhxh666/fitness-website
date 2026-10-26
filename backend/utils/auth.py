@@ -98,3 +98,16 @@ def require_admin(f):
             return jsonify(code=403, msg="无管理员权限"), 403
         return f(*args, user=user, **kwargs)
     return decorated
+
+
+def require_coach(f):
+    """要求认证教练权限（管理员视作教练，便于后台排查问题）"""
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        user = get_current_user()
+        if user is None:
+            return _unauthorized()
+        if not (user.is_coach or user.is_admin):
+            return jsonify(code=403, msg="仅认证教练可访问，请先在个人中心完成教练认证"), 403
+        return f(*args, user=user, **kwargs)
+    return decorated

@@ -49,3 +49,4 @@ from .profile_request import ProfileChangeRequest
 from .site import SiteInfo
 from .weekly_review import WeeklyReview
 from .workout import WorkoutSession, WorkoutSet, PersonalRecord
+from .coach import CoachApplication, CoachProfile

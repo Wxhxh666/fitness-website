@@ -62,6 +62,7 @@ const pageTitle = computed(() => {
     "/admin/exercises": "动作管理",
     "/admin/plans": "计划管理",
     "/admin/review": "申请审核",
+    "/admin/coaches": "教练审核",
   }
   return m[route.path] || "管理后台"
 })
@@ -73,6 +74,7 @@ const menuItems = [
   { path: "/admin/exercises", label: "动作管理", icon: "Notebook" },
   { path: "/admin/plans", label: "计划管理", icon: "List" },
   { path: "/admin/review", label: "申请审核", icon: "TrendCharts" },
+  { path: "/admin/coaches", label: "教练审核", icon: "FirstAidKit" },
 ]
 
 function logout() {

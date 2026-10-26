@@ -14,6 +14,7 @@ class User(db.Model, BaseModel):
     notification_enabled = db.Column(db.Boolean, default=True, comment="通知开关")
     is_active = db.Column(db.Boolean, default=True, comment="是否启用")
     is_admin = db.Column(db.Boolean, default=False, comment="是否管理员")
+    is_coach = db.Column(db.Boolean, default=False, nullable=False, comment="是否认证教练", index=True)
     last_login_at = db.Column(db.DateTime, nullable=True, comment="最后登录时间")
 
     def to_dict(self, exclude=None):

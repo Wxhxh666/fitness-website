@@ -21,6 +21,7 @@
           <DietPlanLibraryPanel v-show="activeMenu === 'diet'" />
           <MyPlansPanel v-show="activeMenu === 'plans'" />
           <AchievementPanel v-show="activeMenu === 'achievements'" />
+          <CoachAuthPanel v-show="activeMenu === 'coach'" />
           <WeeklyBriefPanel v-show="activeMenu === 'weekly'" />
           <PreferencesPanel v-show="activeMenu === 'prefs'" />
         </main>
@@ -37,6 +38,7 @@ import DashboardPanel from '@/components/profile/DashboardPanel.vue'
 import DietPlanLibraryPanel from '@/components/profile/DietPlanLibraryPanel.vue'
 import MyPlansPanel from '@/components/profile/MyPlansPanel.vue'
 import AchievementPanel from '@/components/profile/AchievementPanel.vue'
+import CoachAuthPanel from '@/components/profile/CoachAuthPanel.vue'
 import WeeklyBriefPanel from '@/components/profile/WeeklyBriefPanel.vue'
 import PreferencesPanel from '@/components/profile/PreferencesPanel.vue'
 

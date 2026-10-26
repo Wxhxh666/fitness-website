@@ -39,6 +39,17 @@ const router = createRouter({
         { path: 'exercises', component: () => import('@/views/admin/AdminExercises.vue'), meta: { title: '动作管理' } },
         { path: 'plans', component: () => import('@/views/admin/AdminPlans.vue'), meta: { title: '计划管理' } },
         { path: 'review', component: () => import('@/views/admin/AdminReview.vue'), meta: { title: '申请审核' } },
+        { path: 'coaches', component: () => import('@/views/admin/AdminCoaches.vue'), meta: { title: '教练审核' } },
+      ],
+    },
+    {
+      path: '/coach',
+      component: () => import('@/views/coach/CoachLayout.vue'),
+      meta: { requiresAuth: true, requiresCoach: true },
+      children: [
+        { path: '', redirect: '/coach/dashboard' },
+        { path: 'dashboard', component: () => import('@/views/coach/CoachDashboard.vue'), meta: { title: '教练工作台' } },
+        { path: 'profile', component: () => import('@/views/coach/CoachProfileEdit.vue'), meta: { title: '教练资料' } },
       ],
     },
     { path: '/:pathMatch(.*)*', redirect: '/' },
@@ -63,6 +74,14 @@ router.beforeEach((to) => {
     const user = getUser()
     if (!user?.is_admin) {
       return { path: '/' }
+    }
+  }
+
+  if (to.meta.requiresCoach) {
+    const user = getUser()
+    // 教练或管理员都可进入工作台；is_coach 以最新登录数据为准
+    if (!user?.is_coach && !user?.is_admin) {
+      return { path: '/profile', query: { redirect: to.fullPath } }
     }
   }
 

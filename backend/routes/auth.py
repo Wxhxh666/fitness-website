@@ -49,6 +49,7 @@ def _login_payload(user):
         "nickname": user.nickname or (user.email or user.phone or "用户")[:4] + "***",
         "token": generate_token(user.id),
         "is_admin": bool(user.is_admin),
+        "is_coach": bool(user.is_coach),
         "avatar_url": user.avatar_url,
     }
 

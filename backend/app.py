@@ -136,6 +136,7 @@ def create_app():
     from routes.ai import ai_bp
     from routes.workouts import workouts_bp
     from routes.achievements import achievements_bp
+    from routes.coaches import coaches_bp
 
     app.register_blueprint(exercises_bp, url_prefix="/api/exercises")
     app.register_blueprint(plans_bp, url_prefix="/api/plans")
@@ -149,6 +150,7 @@ def create_app():
     app.register_blueprint(ai_bp, url_prefix="/api/ai")
     app.register_blueprint(workouts_bp, url_prefix="/api/workouts")
     app.register_blueprint(achievements_bp, url_prefix="/api/achievements")
+    app.register_blueprint(coaches_bp, url_prefix="/api/coaches")
 
     # Root - API index
     @app.route("/api", methods=["GET"])
